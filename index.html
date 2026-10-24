@@ -240,9 +240,11 @@
 
         function switchTab(tab) {
             ['builder', 'team', 'campaigns', 'billing'].forEach(t => {
-                document.getElementById(`sec-${t}`).classList.add('hidden'); document.getElementById(`btn-${t}`)?.classList.remove('active');
+                document.getElementById(`sec-${t}`).classList.add('hidden');
+                document.getElementById(`btn-${t}`)?.classList.remove('active');
             });
-            document.getElementById(`sec-${tab}`).classList.remove('hidden'); document.getElementById(`btn-${tab}`)?.classList.add('active');
+            document.getElementById(`sec-${tab}`).classList.remove('hidden');
+            document.getElementById(`btn-${tab}`)?.classList.add('active');
 
             // Titles
             const titles = {
@@ -311,4 +313,106 @@
                 .order('created_at', { ascending: false });
 
             if (error) {
-                grid.innerHTML = `<div class="glass-panel p-6 rounded-2xl text-
+                grid.innerHTML = `<div class="glass-panel p-6 rounded-2xl text-center text-rose-600 font-bold col-span-full">❌ Error loading team: ${error.message}</div>`;
+                return;
+            }
+
+            if (!data || data.length === 0) {
+                grid.innerHTML = `<div class="glass-panel p-6 rounded-2xl text-center text-slate-500 col-span-full">No team profiles saved yet. Build one in the Signature Builder tab!</div>`;
+                return;
+            }
+
+            // Render cards
+            grid.innerHTML = data.map(item => `
+                <div class="glass-panel p-5 rounded-2xl shadow-sm flex flex-col justify-between space-y-4">
+                    <div>
+                        <div class="flex items-center justify-between border-b pb-2 mb-3">
+                            <div>
+                                <h4 class="font-extrabold text-slate-900 text-base">${item.full_name || 'Unnamed Member'}</h4>
+                                <p class="text-xs text-indigo-600 font-semibold">${item.job_title || 'No Title'}</p>
+                            </div>
+                            <span class="bg-emerald-100 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded-full">Active</span>
+                        </div>
+                        <div class="text-xs text-slate-600 space-y-1">
+                            <p>📧 ${item.email || 'N/A'}</p>
+                            <p>📞 ${item.phone || 'N/A'}</p>
+                        </div>
+                    </div>
+                    <button onclick="copyMemberSig('${item.full_name}', '${item.job_title}', '${item.email}', '${item.phone}')" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-2 rounded-xl text-xs transition-all flex items-center justify-center gap-1">
+                        📋 Copy Member Signature
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        // COPY INDIVIDUAL MEMBER SIGNATURE
+        async function copyMemberSig(name, title, email, phone) {
+            const currentBanner = document.getElementById('in-banner').value;
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = `
+                <div style="font-family: Arial, sans-serif; font-size: 14px; color: #333;">
+                    <p style="font-size: 16px; font-weight: bold; color: #1e1b4b; margin:0;">${name}</p>
+                    <p style="font-size: 13px; color: #4f46e5; margin: 2px 0 8px 0;">${title}</p>
+                    <p style="font-size: 12px; color: #64748b; margin: 0;">📧 ${email} | 📞 ${phone}</p>
+                    <div style="margin-top: 12px;">
+                        <img src="${currentBanner}" style="max-width: 100%; height: auto; border-radius: 8px; border: 1px solid #e2e8f0;">
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(tempDiv);
+            
+            try {
+                const blob = new Blob([tempDiv.innerHTML], { type: 'text/html' });
+                const textBlob = new Blob([tempDiv.innerText], { type: 'text/plain' });
+                const item = new ClipboardItem({ 'text/html': blob, 'text/plain': textBlob });
+                await navigator.clipboard.write([item]);
+                alert(`📋 Copied signature with active banner for ${name}!`);
+            } catch (err) {
+                alert(`❌ Failed to copy signature.`);
+            } finally {
+                document.body.removeChild(tempDiv);
+            }
+        }
+
+        // COPY RICH FORMATTED SIGNATURE
+        async function copyRichSignature() {
+            const previewEl = document.getElementById('sig-preview');
+            const status = document.getElementById('save-status');
+            
+            try {
+                const range = document.createRange();
+                range.selectNode(previewEl);
+                window.getSelection().removeAllRanges();
+                window.getSelection().addRange(range);
+                
+                const blob = new Blob([previewEl.innerHTML], { type: 'text/html' });
+                const textBlob = new Blob([previewEl.innerText], { type: 'text/plain' });
+                const item = new ClipboardItem({ 'text/html': blob, 'text/plain': textBlob });
+                
+                await navigator.clipboard.write([item]);
+                window.getSelection().removeAllRanges();
+                
+                status.innerText = "📋 Signature copied! Ready to paste into Gmail or Outlook.";
+                status.className = "text-xs text-center font-bold text-emerald-600 mt-4";
+            } catch (err) {
+                status.innerText = "⚠️ Could not copy rich signature.";
+                status.className = "text-xs text-center font-bold text-amber-600 mt-4";
+            }
+        }
+
+        // COPY RAW HTML CODE
+        function copyRawHTML() {
+            const previewEl = document.getElementById('sig-preview');
+            const status = document.getElementById('save-status');
+            
+            navigator.clipboard.writeText(previewEl.innerHTML).then(() => {
+                status.innerText = "📄 HTML Code copied to clipboard!";
+                status.className = "text-xs text-center font-bold text-indigo-600 mt-4";
+            }).catch(err => {
+                status.innerText = "❌ Failed to copy HTML.";
+                status.className = "text-xs text-center font-bold text-rose-600 mt-4";
+            });
+        }
+    </script>
+</body>
+</html>
