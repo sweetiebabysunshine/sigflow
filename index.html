@@ -10,16 +10,16 @@
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
         .glass-panel { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border: 1px solid rgba(226, 232, 240, 0.8); }
-        .tab-btn.active { background: #4f46e5; color: white; shadow: 0 4px 12px rgba(79, 70, 229, 0.25); }
+        .tab-btn.active { background: #4f46e5; color: white; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25); }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col md:flex-row">
 
-    const SUPABASE_KEY = "EyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpsZWZoa215ZG1hYWpoZHB0YnphIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI4MDM1MzgsImV4cCI6MjEwODM3OTUzOH0.T0uOZUJ2YSJtaJNV3vM3VeCu1WzgiwjS1rjYUf5oUL8".trim();
-
+    <!-- SUPABASE INIT -->
     <script>
-        const SUPABASE_URL = "https://zlefhkmydmaajhdptbza.supabase.co";
-        const SUPABASE_KEY = "EyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpsZWZoa215ZG1hYWpoZHB0YnphIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI4MDM1MzgsImV4cCI6MjEwODM3OTUzOH0.T0uOZUJ2YSJtaJNV3vM3VeCu1WzgiwjS1rjYUf5oUL8";
+        const SUPABASE_URL = "https://zlefhkmydmaajhdptbza.supabase.co".trim();
+        const RAW_KEY = "EyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpsZWZoa215ZG1hYWpoZHB0YnphIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI4MDM1MzgsImV4cCI6MjEwODM3OTUzOH0.T0uOZUJ2YSJtaJNV3vM3VeCu1WzgiwjS1rjYUf5oUL8";
+        const SUPABASE_KEY = RAW_KEY.trim().replace(/\s+/g, '');
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     </script>
 
