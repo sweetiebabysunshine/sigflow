@@ -132,6 +132,16 @@
                                 </div>
                             </div>
                         </div>
+
+                        <!-- COPY BUTTONS -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
+                            <button onclick="copyRichSignature()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-4 rounded-xl shadow-md transition-all text-xs flex items-center justify-center gap-2">
+                                📋 Copy Rich Signature
+                            </button>
+                            <button onclick="copyRawHTML()" class="bg-slate-800 hover:bg-slate-900 text-white font-bold py-2.5 px-4 rounded-xl shadow-md transition-all text-xs flex items-center justify-center gap-2">
+                                📄 Copy HTML Code
+                            </button>
+                        </div>
                     </div>
                     <p id="save-status" class="text-xs text-center font-bold text-emerald-600 mt-4"></p>
                 </div>
@@ -197,6 +207,49 @@
                 status.innerText = "✅ Saved successfully to Supabase!";
                 status.className = "text-xs text-center font-bold text-emerald-600 mt-4";
             }
+        }
+
+        // COPY RICH FORMATTED SIGNATURE (FOR GMAIL / OUTLOOK)
+        async function copyRichSignature() {
+            const previewEl = document.getElementById('sig-preview');
+            const status = document.getElementById('save-status');
+            
+            try {
+                const range = document.createRange();
+                range.selectNode(previewEl);
+                window.getSelection().removeAllRanges();
+                window.getSelection().addRange(range);
+                
+                const blob = new Blob([previewEl.innerHTML], { type: 'text/html' });
+                const textBlob = new Blob([previewEl.innerText], { type: 'text/plain' });
+                const item = new ClipboardItem({
+                    'text/html': blob,
+                    'text/plain': textBlob
+                });
+                
+                await navigator.clipboard.write([item]);
+                window.getSelection().removeAllRanges();
+                
+                status.innerText = "📋 Signature copied! Ready to paste into Gmail or Outlook.";
+                status.className = "text-xs text-center font-bold text-emerald-600 mt-4";
+            } catch (err) {
+                status.innerText = "⚠️ Could not copy rich signature. Trying fallback...";
+                status.className = "text-xs text-center font-bold text-amber-600 mt-4";
+            }
+        }
+
+        // COPY RAW HTML CODE
+        function copyRawHTML() {
+            const previewEl = document.getElementById('sig-preview');
+            const status = document.getElementById('save-status');
+            
+            navigator.clipboard.writeText(previewEl.innerHTML).then(() => {
+                status.innerText = "📄 HTML Code copied to clipboard!";
+                status.className = "text-xs text-center font-bold text-indigo-600 mt-4";
+            }).catch(err => {
+                status.innerText = "❌ Failed to copy HTML.";
+                status.className = "text-xs text-center font-bold text-rose-600 mt-4";
+            });
         }
     </script>
 </body>
