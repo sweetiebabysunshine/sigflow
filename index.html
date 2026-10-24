@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SigFlow - Team Email Signature & Campaign Manager</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        indigo: {
+                            50: '#eep2ff',
+                            100: '#e0e7ff',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            900: '#312e81',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        @keyframes slideUp {
+            from { transform: translateY(100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+        .toast-enter { animation: slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .toast-exit { animation: fadeOut 0.2s ease-in forwards; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col">
+
+    <div class="flex flex-1 h-screen overflow-hidden">
+
+        <!-- ================= SIDEBAR ================= -->
+        <aside class="w-64 bg-slate-900 text-slate-300 flex flex-col justify-between shrink-0 border-r border-slate-800 z-20">
+            <div>
+                <!-- App Logo -->
+                <div class="h-16 flex items-center px-6 border-b border-slate-800/80 gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-indigo-500/30">
+                        <i class="fa-solid fa-signature text-base"></i>
+                    </div>
+                    <div>
+                        <span class="font-extrabold text-white tracking-tight text-lg">SigFlow</span>
+                        <span class="text-[10px] font-bold text-indigo-400 block -mt-1 tracking-wider uppercase">Campaign SaaS</span>
+                    </div>
+                </div>
+
+                <!-- Navigation Links -->
+                <nav class="p-3.5 space-y-1">
+                    <button onclick="switchTab('builder')" id="nav-builder" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all bg-indigo-600 text-white shadow-md shadow-indigo-600/30">
+                        <i class="fa-solid fa-wand-magic-sparkles w-4 text-center"></i>
+                        <span>Signature Builder</span>
+                    </button>
+
+                    <button onclick="switchTab('banners')" id="nav-banners" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all text-slate-400 hover:text-white hover:bg-slate-800/70">
+                        <i class="fa-solid fa-rectangle-ad w-4 text-center"></i>
+                        <span>Campaign Banners</span>
+                        <span class="ml-auto bg-indigo-500/20 text-indigo-300 text-[10px] font-bold px-2 py-0.5 rounded-full border border-indigo-500/30" id="badge-active-banners">3 Active</span>
+                    </button>
+
+                    <button onclick="switchTab('team')" id="nav-team" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all text-slate-400 hover:text-white hover:bg-slate-800/70">
+                        <i class="fa-solid fa-users w-4 text-center"></i>
+                        <span>Team & Seats</span>
+                        <span class="ml-auto bg-slate-800 text-slate-400 text-[10px] font-bold px-2 py-0.5 rounded-full" id="badge-seat-count">8/15</span>
+                    </button>
+
+                    <button onclick="switchTab('settings')" id="nav-settings" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all text-slate-400 hover:text-white hover:bg-slate-800/70">
+                        <i class="fa-solid fa-sliders w-4 text-center"></i>
+                        <span>Settings & Billing</span>
+                    </button>
+                </nav>
+            </div>
+
+            <!-- Seat Capacity Widget -->
+            <div class="p-4 m-3 rounded-2xl bg-slate-800/60 border border-slate-700/60">
+                <div class="flex items-center justify-between text-xs text-slate-300 font-semibold mb-1.5">
+                    <span>Starter Plan</span>
+                    <span class="text-indigo-400 font-bold" id="sidebar-seat-text">8 / 15 Seats</span>
+                </div>
+                <div class="w-full bg-slate-700 h-2 rounded-full overflow-hidden mb-2.5">
+                    <div id="sidebar-seat-progress" class="bg-indigo-500 h-full rounded-full transition-all duration-500" style="width: 53.3%;"></div>
+                </div>
+                <p class="text-[11px] text-slate-400 mb-3">Upgrade to Growth for unlimited team seats & analytics.</p>
+                <button onclick="switchTab('settings')" class="w-full py-1.5 px-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-bold transition-all shadow-sm">
+                    Upgrade Plan
+                </button>
+            </div>
+        </aside>
+
+        <!-- ================= MAIN APP WRAPPER ================= -->
+        <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+
+            <!-- HEADER -->
+            <header class="h-16 bg-white border-b border-slate-200/80 px-6 flex items-center justify-between z-10 shrink-0">
+                <!-- Org Switcher -->
+                <div class="flex items-center gap-4">
+                    <div class="flex items-center gap-2.5 px-3 py-1.5 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-slate-100/80 transition-colors cursor-pointer">
+                        <span class="w-7 h-7 rounded-lg bg-indigo-100 text-indigo-700 font-bold text-xs flex items-center justify-center border border-indigo-200">AC</span>
+                        <div>
+                            <div class="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                                Acme Corp
+                                <i class="fa-solid fa-chevron-down text-[10px] text-slate-400"></i>
+                            </div>
+                            <div class="text-[10px] text-slate-500 font-medium">Starter Tier (8/15 Seats Used)</div>
+                        </div>
+                    </div>
+
+                    <div class="h-5 w-px bg-slate-200"></div>
+
+                    <div class="hidden md:flex items-center gap-2 bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs px-3 py-1 rounded-full font-medium">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                        Banner Campaigns Sync Active
+                    </div>
+                </div>
+
+                <!-- Right Menu -->
+                <div class="flex items-center gap-3">
+                    <button onclick="showToast('Notification panel coming soon!')" class="w-9 h-9 flex items-center justify-center rounded-xl text-slate-500 hover:text-slate-700 hover:bg-slate-100 transition-colors relative">
+                        <i class="fa-regular fa-bell"></i>
+                        <span class="absolute top-2 right-2 w-2 h-2 bg-indigo-600 rounded-full"></span>
+                    </button>
+                    
+                    <div class="h-5 w-px bg-slate-200"></div>
+
+                    <div class="flex items-center gap-3 pl-1">
+                        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=120" alt="Sarah J." class="w-9 h-9 rounded-full object-cover border-2 border-indigo-100">
+                        <div class="hidden sm:block text-left">
+                            <div class="text-xs font-bold text-slate-800 leading-tight">Sarah Jenkins</div>
+                            <div class="text-[10px] text-slate-500">Marketing Director</div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- MAIN VIEWPORT -->
+            <main class="flex-1 overflow-y-auto bg-slate-50/70 p-6">
+
+                <!-- ================= TAB 1: SIGNATURE BUILDER ================= -->
+                <div id="tab-builder" class="tab-content max-w-7xl mx-auto space-y-6">
+                    
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2 border-b border-slate-200/80">
+                        <div>
+                            <h1 class="text-xl font-bold text-slate-900">Email Signature Builder</h1>
+                            <p class="text-xs text-slate-500">Customize live template variables, brand styling, and dynamic banner integration.</p>
+                        </div>
+                        <div class="flex items-center gap-2.5">
+                            <button onclick="saveTemplate()" class="px-3.5 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-bold rounded-xl shadow-sm transition-colors flex items-center gap-2">
+                                <i class="fa-regular fa-floppy-disk text-slate-400"></i> Save Template
+                            </button>
+                            <button onclick="copyVisualSignature()" class="px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl shadow-sm transition-colors flex items-center gap-2">
+                                <i class="fa-solid fa-copy text-xs"></i> Copy Visual Signature
+                            </button>
+                            <button onclick="copySignatureHTML()" class="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-md shadow-indigo-600/20 transition-all flex items-center gap-2">
+                                <i class="fa-solid fa-code text-xs"></i> Copy HTML Code
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Builder Grid -->
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+                        <!-- LEFT PANEL: CONTROLS (7 Cols) -->
+                        <div class="lg:col-span-7 space-y-5">
+                            
+                            <!-- Card 1: Personal Info -->
+                            <div class="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-5 space-y-4">
+                                <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                                    <h2 class="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-2">
+                                        <i class="fa-solid fa-user text-indigo-500"></i> Personal Information
+                                    </h2>
+                                    <span class="text-[11px] text-slate-400">Live editor inputs</span>
+                                </div>
+
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-600 mb-1">First Name</label>
+                                        <input type="text" id="input-fn" value="Alex" oninput="updateSignature()" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-600 mb-1">Last Name</label>
+                                        <input type="text" id="input-ln" value="Morgan" oninput="updateSignature()" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-600 mb-1">Job Title</label>
+                                        <input type="text" id="input-title" value="VP of Product Growth" oninput="updateSignature()" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-600 mb-1">Department / Company</label>
+                                        <input type="text" id="input-company" value="Acme Corp" oninput="updateSignature()" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-600 mb-1">Email Address</label>
+                                        <input type="email" id="input-email" value="alex.morgan@acmecorp.com" oninput="updateSignature()" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-600 mb-1">Phone Number</label>
+                                        <input type="text" id="input-phone" value="+1 (555) 019-2834" oninput="updateSignature()" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all">
+                                    </div>
+                                    <div class="sm:col-span-2">
+                                        <label class="block text-xs font-semibold text-slate-600 mb-1">Office Address</label>
+                                        <input type="text" id="input-address" value="500 Market Street, Suite 400, San Francisco, CA" oninput="updateSignature()" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all">
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">Profile Image URL</label>
+                                    <div class="flex gap-2">
+                                        <input type="text" id="input-photo" value="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=200" oninput="updateSignature()" class="flex-1 px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all">
+                                        <button onclick="randomizePhoto()" class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition-colors shrink-0">
+                                            <i class="fa-solid fa-shuffle mr-1"></i> Random Photo
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Card 2: Customization & Colors -->
+                            <div class="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-5 space-y-4">
+                                <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                                    <h2 class="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-2">
+                                        <i class="fa-solid fa-palette text-violet-500"></i> Style & Theme Settings
+                                    </h2>
+                                </div>
+
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <!-- Primary Color Picker -->
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-600 mb-1.5">Accent Color</label>
+                                        <div class="flex items-center gap-2">
+                                            <input type="color" id="input-color" value="#4f46e5" onchange="updateSignature()" class="w-9 h-9 rounded-xl border border-slate-200 cursor-pointer p-0.5">
+                                            <input type="text" id="input-color-hex" value="#4f46e5" readonly class="w-24 px-3 py-2 text-xs rounded-xl border border-slate-200 bg-slate-50 font-mono text-slate-600">
+                                        </div>
+                                    </div>
+
+                                    <!-- Font Picker -->
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-600 mb-1.5">Font Family</label>
+                                        <select id="input-font" onchange="updateSignature()" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 bg-white font-medium">
+                                            <option value="Arial, sans-serif">Arial (Universal)</option>
+                                            <option value="Segoe UI, Tahoma, sans-serif">Segoe UI (Windows Native)</option>
+                                            <option value="Trebuchet MS, sans-serif">Trebuchet MS (Modern)</option>
+                                            <option value="Georgia, serif">Georgia (Classic Serif)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Card 3: Campaign Banner Selector -->
+                            <div class="bg-indigo-50/40 rounded-2xl border border-indigo-200/80 shadow-sm p-5 space-y-3">
+                                <div class="flex items-center justify-between">
+                                    <h2 class="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-2">
+                                        <i class="fa-solid fa-rectangle-ad text-indigo-600"></i> Dynamic Campaign Banner
+                                    </h2>
+                                    <span class="text-[10px] bg-indigo-100 text-indigo-700 font-bold px-2.5 py-0.5 rounded-full border border-indigo-200">Auto-Attached</span>
+                                </div>
+                                <p class="text-xs text-slate-500">Select an active marketing campaign banner to display at the base of this email signature.</p>
+
+                                <select id="input-banner-select" onchange="updateSignature()" class="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 bg-white font-semibold text-slate-800">
+                                    <option value="webinar">Q4 Product Webinar Promo (Active)</option>
+                                    <option value="blackfriday">Black Friday Sale Campaign</option>
+                                    <option value="casestudy">New Enterprise Case Study Download</option>
+                                    <option value="none">-- No Campaign Banner (Clean Signature) --</option>
+                                </select>
+                            </div>
+
+                        </div>
+
+                        <!-- RIGHT PANEL: LIVE EMAIL PREVIEW (5 Cols) -->
+                        <div class="lg:col-span-5 sticky top-6">
+                            <div class="bg-white rounded-2xl border border-slate-200/90 shadow-sm overflow-hidden flex flex-col">
+                                
+                                <!-- Mock Email Client Top Bar -->
+                                <div class="bg-slate-100/90 px-4 py-3 border-b border-slate-200/80 flex items-center justify-between">
+                                    <div class="flex items-center gap-2">
+                                        <div class="flex gap-1.5">
+                                            <div class="w-2.5 h-2.5 rounded-full bg-rose-400"></div>
+                                            <div class="w-2.5 h-2.5 rounded-full bg-amber-400"></div>
+                                            <div class="w-2.5 h-2.5 rounded-full bg-emerald-400"></div>
+                                        </div>
+                                        <span class="text-xs font-bold text-slate-600 ml-2"><i class="fa-regular fa-envelope mr-1.5 text-slate-400"></i> Email Preview</span>
+                                    </div>
+                                    <span class="text-[10px] text-slate-400 font-bold tracking-wider uppercase">Standard Client</span>
+                                </div>
+
+                                <!-- Mock Message Header -->
+                                <div class="p-4 border-b border-slate-100 bg-slate-50/50 space-y-1.5 text-xs text-slate-600">
+                                    <div><span class="font-semibold text-slate-400 w-14 inline-block">To:</span> prospective.client@enterprise.com</div>
+                                    <div><span class="font-semibold text-slate-400 w-14 inline-block">Subject:</span> Re: Partnership & Growth Strategy Proposal</div>
+                                </div>
+
+                                <!-- Mock Email Body Content -->
+                                <div class="p-5 text-xs text-slate-700 space-y-3 leading-relaxed">
+                                    <p>Hi Jordan,</p>
+                                    <p>Great speaking with you earlier! As discussed, I'm sending over our revised project scope and timeline.</p>
+                                    <p>Please review the details below and let me know if you have any questions before our sync tomorrow.</p>
+                                    <p class="pt-2 font-medium text-slate-800">Best regards,</p>
+                                    
+                                    <!-- LIVE SIGNATURE TARGET CONTAINER -->
+                                    <div id="signature-preview-target" class="pt-4 border-t border-slate-200/80 mt-4 overflow-x-auto">
+                                        <!-- Rendered dynamically by JavaScript -->
+                                    </div>
+                                </div>
+
+                                <!-- Preview Action Bar -->
+                                <div class="p-3.5 bg-slate-50 border-t border-slate-200 flex items-center justify-between gap-2">
+                                    <span class="text-[11px] text-slate-500 font-medium"><i class="fa-solid fa-circle-check text-emerald-500 mr-1"></i> Live Render OK</span>
+                                    <button onclick="copyVisualSignature()" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg transition-colors flex items-center gap-1.5">
+                                        <i class="fa-regular fa-copy"></i> Copy Visual
+                                    </button>
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+
+                <!-- ================= TAB 2: CAMPAIGN BANNERS ================= -->
+                <div id="tab-banners" class="tab-content hidden max-w-7xl mx-auto space-y-6">
+                    
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2 border-b border-slate-200/80">
+                        <div>
+                            <h1 class="text-xl font-bold text-slate-900">Campaign Banner Manager</h1>
+                            <p class="text-xs text-slate-500">Deploy promotional banners across all company signatures and track click-through engagement.</p>
+                        </div>
+                        <div class="flex items-center gap-2.5">
+                            <button onclick="deployAllBanners()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-sm transition-colors flex items-center gap-2">
+                                <i class="fa-solid fa-paper-plane"></i> Deploy Active Campaign to All Signatures
+                            </button>
+                            <button onclick="openNewBannerModal()" class="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-md shadow-indigo-600/20 transition-all flex items-center gap-2">
+                                <i class="fa-solid fa-plus"></i> Create New Campaign
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Banners Grid -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" id="banners-container">
+                        <!-- Rendered by JS -->
+                    </div>
+                </div>
+
+
+                <!-- ================= TAB 3: TEAM & SEATS ================= -->
+                <div id="tab-team" class="tab-content hidden max-w-7xl mx-auto space-y-6">
+                    
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2 border-b border-slate-200/80">
+                        <div>
+                            <h1 class="text-xl font-bold text-slate-900">Team & Seats Management</h1>
+                            <p class="text-xs text-slate-500">Manage team seat allocations, signature compliance, and automated invitations.</p>
+                        </div>
+                        <div class="flex items-center gap-2.5">
+                            <button onclick="simulateCSVUpload()" class="px-3.5 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-bold rounded-xl shadow-sm transition-colors flex items-center gap-2">
+                                <i class="fa-solid fa-file-csv text-slate-500"></i> Import CSV
+                            </button>
+                            <button onclick="openInviteModal()" class="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-md shadow-indigo-600/20 transition-all flex items-center gap-2">
+                                <i class="fa-solid fa-user-plus"></i> Invite Team Member
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Seat Progress Bar Card -->
+                    <div class="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-5 flex flex-col md:flex-row items-center justify-between gap-6">
+                        <div class="space-y-1 w-full md:w-auto">
+                            <div class="text-xs font-bold text-slate-400 uppercase tracking-wider">Plan Usage</div>
+                            <div class="text-base font-extrabold text-slate-800" id="team-seats-heading">8 of 15 Starter Seats Occupied</div>
+                            <div class="text-xs text-slate-500">7 additional seat invites remaining on your current billing cycle.</div>
+                        </div>
+                        <div class="w-full md:w-72 space-y-1.5">
+                            <div class="flex justify-between text-xs font-bold text-slate-600">
+                                <span>Capacity</span>
+                                <span id="team-seat-percent">53.3%</span>
+                            </div>
+                            <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                                <div id="team-seat-bar" class="bg-indigo-600 h-full rounded-full transition-all duration-500" style="width: 53.3%;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Filter Bar & Search -->
+                    <div class="flex flex-col sm:flex-row items-center justify-between gap-3 bg-white p-3.5 rounded-2xl border border-slate-200/90 shadow-sm">
+                        <div class="relative w-full sm:w-80">
+                            <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                            <input type="text" id="team-search" oninput="filterTeamTable()" placeholder="Search team members by name or email..." class="w-full pl-9 pr-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500">
+                        </div>
+                        <div class="text-xs text-slate-500 font-medium self-end sm:self-center">
+                            Showing <span id="team-count" class="font-bold text-slate-800">8</span> members
+                        </div>
+                    </div>
+
+                    <!-- Team Members Table -->
+                    <div class="bg-white rounded-2xl border border-slate-200/90 shadow-sm overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-slate-50 border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                                        <th class="p-4">Member Name</th>
+                                        <th class="p-4">Title / Department</th>
+                                        <th class="p-4">Status</th>
+                                        <th class="p-4">Active Banner</th>
+                                        <th class="p-4 text-right">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100 text-xs text-slate-700" id="team-table-body">
+                                    <!-- Rendered dynamically by JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+
+
+                <!-- ================= TAB 4: SETTINGS & BILLING ================= -->
+                <div id="tab-settings" class="tab-content hidden max-w-7xl mx-auto space-y-6">
+                    
+                    <div class="pb-2 border-b border-slate-200/80">
+                        <h1 class="text-xl font-bold text-slate-900">Settings & Subscription Billing</h1>
+                        <p class="text-xs text-slate-500">Manage your subscription plan tier, team seats, and payment methods.</p>
+                    </div>
+
+                    <!-- Pricing Cards Comparison -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        
+                        <!-- Starter Plan -->
+                        <div class="bg-white rounded-2xl border-2 border-indigo-500 shadow-md p-6 relative flex flex-col justify-between space-y-6">
+                            <span class="absolute -top-3 right-6 bg-indigo-600 text-white text-[10px] font-extrabold uppercase px-3 py-1 rounded-full shadow-sm tracking-wider">Current Active Plan</span>
+                            
+                            <div class="space-y-4">
+                                <div>
+                                    <h3 class="text-lg font-bold text-slate-900">Starter Tier</h3>
+                                    <p class="text-xs text-slate-500">Perfect for growing startups & boutique agencies.</p>
+                                </div>
+                                <div class="flex items-baseline gap-1">
+                                    <span class="text-3xl font-extrabold text-slate-900">$19</span>
+                                    <span class="text-xs text-slate-500 font-semibold">/ month</span>
+                                </div>
+                                <ul class="space-y-2.5 text-xs text-slate-600">
+                                    <li class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-500"></i> Up to 15 Team Seats Included</li>
+                                    <li class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-500"></i> Unlimited Dynamic Banner Campaigns</li>
+                                    <li class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-500"></i> Gmail & Outlook 1-Click Install</li>
+                                    <li class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-500"></i> Standard Click Analytics</li>
+                                </ul>
+                            </div>
+
+                            <button onclick="showToast('You are currently on the Starter Plan.')" class="w-full py-2.5 bg-slate-100 text-slate-700 font-bold rounded-xl text-xs border border-slate-200">
+                                Active Subscription
+                            </button>
+                        </div>
+
+                        <!-- Growth Plan -->
+                        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 flex flex-col justify-between space-y-6">
+                            <div class="space-y-4">
+                                <div>
+                                    <h3 class="text-lg font-bold text-slate-900">Growth Tier</h3>
+                                    <p class="text-xs text-slate-500">For scaling enterprises needing unlimited seats.</p>
+                                </div>
+                                <div class="flex items-baseline gap-1">
+                                    <span class="text-3xl font-extrabold text-slate-900">$49</span>
+                                    <span class="text-xs text-slate-500 font-semibold">/ month</span>
+                                </div>
+                                <ul class="space-y-2.5 text-xs text-slate-600">
+                                    <li class="flex items-center gap-2"><i class="fa-solid fa-check text-indigo-500"></i> <strong>Unlimited</strong> Team Seats</li>
+                                    <li class="flex items-center gap-2"><i class="fa-solid fa-check text-indigo-500"></i> Automated Directory Sync (Google / Office 365)</li>
+                                    <li class="flex items-center gap-2"><i class="fa-solid fa-check text-indigo-500"></i> Advanced Banner Click & CTR Analytics</li>
+                                    <li class="flex items-center gap-2"><i class="fa-solid fa-check text-indigo-500"></i> Priority B2B Customer Support</li>
+                                </ul>
+                            </div>
+
+                            <button onclick="upgradeToGrowth()" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs transition-colors shadow-md shadow-indigo-600/20">
+                                Upgrade to Growth Plan ($49/mo)
+                            </button>
+                        </div>
+
+                    </div>
+
+                    <!-- Payment Method & Invoice History -->
+                    <div class="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 space-y-5">
+                        <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                            <h2 class="text-sm font-bold text-slate-800">Payment Methods & Invoices</h2>
+                            <button onclick="showToast('Payment method update dialog opened.')" class="text-xs text-indigo-600 hover:text-indigo-700 font-bold">Update Card</button>
+                        </div>
+
+                        <div class="flex items-center gap-4 bg-slate-50 p-4 rounded-xl border border-slate-200/80">
+                            <div class="w-10 h-7 bg-slate-800 text-white font-bold rounded flex items-center justify-center text-[10px]">VISA</div>
+                            <div>
+                                <div class="text-xs font-bold text-slate-800">Visa ending in •••• 4242</div>
+                                <div class="text-[11px] text-slate-500">Expires 08/2028 • Default Payment Method</div>
+                            </div>
+                        </div>
+
+                        <div class="space-y-2">
+                            <div class="text-xs font-bold text-slate-700">Recent Invoice History</div>
+                            <div class="divide-y divide-slate-100 text-xs">
+                                <div class="py-2.5 flex items-center justify-between">
+                                    <div>
+                                        <span class="font-bold text-slate-800">Oct 01, 2026</span>
+                                        <span class="text-slate-400 ml-2">#INV-2026-10</span>
+                                    </div>
+                                    <div class="flex items-center gap-3">
+                                        <span class="font-semibold text-slate-800">$19.00</span>
+                                        <button onclick="showToast('Downloading invoice PDF...')" class="text-indigo-600 hover:underline font-semibold">PDF</button>
+                                    </div>
+                                </div>
+                                <div class="py-2.5 flex items-center justify-between">
+                                    <div>
+                                        <span class="font-bold text-slate-800">Sep 01, 2026</span>
+                                        <span class="text-slate-400 ml-2">#INV-2026-09</span>
+                                    </div>
+                                    <div class="flex items-center gap-3">
+                                        <span class="font-semibold text-slate-800">$19.00</span>
+                                        <button onclick="showToast('Downloading invoice PDF...')" class="text-indigo-600 hover:underline font-semibold">PDF</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- ================= MODALS ================= -->
+
+    <!-- Modal 1: Create Banner Campaign -->
+    <div id="modal-banner" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                <h3 class="font-bold text-slate-900 text-sm">Create New Campaign Banner</h3>
+                <button onclick="closeBannerModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="space-y-3 text-xs">
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Campaign Title</label>
+                    <input type="text" id="new-banner-title" placeholder="e.g. Q4 Product Webinar Promo" class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Banner Image URL</label>
+                    <input type="text" id="new-banner-img" value="https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&q=80&w=600&h=200" class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Target Redirect Link URL</label>
+                    <input type="text" id="new-banner-link" placeholder="https://acmecorp.com/webinar" class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500">
+                </div>
+            </div>
+            <div class="flex justify-end gap-2 pt-2">
+                <button onclick="closeBannerModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs">Cancel</button>
+                <button onclick="submitNewBanner()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs">Save Campaign</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 2: Invite Team Member -->
+    <div id="modal-invite" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                <h3 class="font-bold text-slate-900 text-sm">Invite New Team Member</h3>
+                <button onclick="closeInviteModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="space-y-3 text-xs">
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Full Name</label>
+                    <input type="text" id="invite-name" placeholder="e.g. Jordan Lee" class="w-full px-3 py-2 rounded-xl border border-slate-200">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Work Email</label>
+                    <input type="email" id="invite-email" placeholder="jordan@acmecorp.com" class="w-full px-3 py-2 rounded-xl border border-slate-200">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Job Title</label>
+                    <input type="text" id="invite-title" placeholder="Account Executive" class="w-full px-3 py-2 rounded-xl border border-slate-200">
+                </div>
+            </div>
+            <div class="flex justify-end gap-2 pt-2">
+                <button onclick="closeInviteModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs">Cancel</button>
+                <button onclick="submitInviteMember()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs">Send Invite</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION CONTAINER -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- JAVASCRIPT STATE ENGINE -->
+    <script>
+        // Preset Campaign Banners Data
+        let campaignBanners = [
+            {
+                id: 'webinar',
+                title: 'Q4 Product Webinar Promo',
+                img: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&q=80&w=600&h=200',
+                link: 'https://acmecorp.com/webinar',
+                status: 'ACTIVE',
+                impressions: '14,820',
+                clicks: '842',
+                ctr: '5.68%'
+            },
+            {
+                id: 'blackfriday',
+                title: 'Black Friday Sale Campaign',
+                img: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&q=80&w=600&h=200',
+                link: 'https://acmecorp.com/blackfriday',
+                status: 'ACTIVE',
+                impressions: '8,410',
+                clicks: '612',
+                ctr: '7.27%'
+            },
+            {
+                id: 'casestudy',
+                title: 'New Enterprise Case Study',
+                img: 'https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&q=80&w=600&h=200',
+                link: 'https://acmecorp.com/case-study',
+                status: 'ACTIVE',
+                impressions: '19,200',
+                clicks: '1,104',
+                ctr: '5.75%'
+            }
+        ];
+
+        // Team Members Dataset
+        let teamMembers = [
+            { id: 1, name: 'Alex Morgan', email: 'alex.morgan@acmecorp.com', title: 'VP of Product Growth', status: 'Installed', avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=100', banner: 'Q4 Product Webinar' },
+            { id: 2, name: 'Sarah Jenkins', email: 'sarah.j@acmecorp.com', title: 'Marketing Director', status: 'Installed', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=100', banner: 'Q4 Product Webinar' },
+            { id: 3, name: 'David Chen', email: 'david.c@acmecorp.com', title: 'Senior Account Executive', status: 'Pending Invite', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=100', banner: 'Not Synced' },
+            { id: 4, name: 'Jessica Taylor', email: 'jessica.t@acmecorp.com', title: 'Customer Success Lead', status: 'Installed', avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&q=80&w=100', banner: 'Q4 Product Webinar' },
+            { id: 5, name: 'Marcus Vance', email: 'marcus.v@acmecorp.com', title: 'Senior Software Engineer', status: 'Installed', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=100', banner: 'Q4 Product Webinar' },
+            { id: 6, name: 'Emily Watson', email: 'emily.w@acmecorp.com', title: 'Operations Manager', status: 'Pending Invite', avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=100', banner: 'Not Synced' },
+            { id: 7, name: 'Robert Blake', email: 'robert.b@acmecorp.com', title: 'Sales Director', status: 'Installed', avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=100', banner: 'Black Friday Sale' },
+            { id: 8, name: 'Hannah Abbott', email: 'hannah.a@acmecorp.com', title: 'HR Generalist', status: 'Installed', avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=100', banner: 'Q4 Product Webinar' }
+        ];
+
+        const AVATARS = [
+            'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=200',
+            'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200',
+            'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200',
+            'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&q=80&w=200'
+        ];
+
+        // Tab Navigation Switcher
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
+            
+            const target = document.getElementById('tab-' + tabId);
+            if (target) target.classList.remove('hidden');
+
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.className = 'nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all text-slate-400 hover:text-white hover:bg-slate-800/70';
+            });
+
+            const activeBtn = document.getElementById('nav-' + tabId);
+            if (activeBtn) {
+                activeBtn.className = 'nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all bg-indigo-600 text-white shadow-md shadow-indigo-600/30';
+            }
+        }
+
+        // Generate HTML Table Signature
+        function generateSignatureHTML() {
+            const fn = document.getElementById('input-fn').value || 'Alex';
+            const ln = document.getElementById('input-ln').value || 'Morgan';
+            const title = document.getElementById('input-title').value || 'VP of Product';
+            const company = document.getElementById('input-company').value || 'Acme Corp';
+            const email = document.getElementById('input-email').value || 'alex@acme.com';
+            const phone = document.getElementById('input-phone').value || '+1 (555) 000-0000';
+            const address = document.getElementById('input-address').value || 'San Francisco, CA';
+            const photo = document.getElementById('input-photo').value;
+            const color = document.getElementById('input-color').value;
+            const font = document.getElementById('input-font').value;
+            const bannerKey = document.getElementById('input-banner-select').value;
+            
+            document.getElementById('input-color-hex').value = color;
+
+            const bannerObj = campaignBanners.find(b => b.id === bannerKey);
+
+            let bannerHTML = '';
+            if (bannerObj) {
+                bannerHTML = `
+                <tr>
+                    <td colspan="2" style="padding-top: 14px;">
+                        <a href="${bannerObj.link}" target="_blank" style="text-decoration: none;">
+                            <img src="${bannerObj.img}" alt="${bannerObj.title}" width="340" style="max-width: 100%; height: auto; border-radius: 8px; display: block; border: 0;" />
+                        </a>
+                    </td>
+                </tr>`;
+            }
+
+            return `
+            <table cellpadding="0" cellspacing="0" border="0" style="font-family: ${font}; font-size: 13px; color: #334155; line-height: 1.4;">
+                <tr>
+                    <td style="padding-right: 14px; vertical-align: top;">
+                        <img src="${photo}" alt="${fn} ${ln}" width="68" height="68" style="border-radius: 50%; display: block; object-fit: cover; border: 2px solid ${color};" />
+                    </td>
+                    <td style="border-left: 2px solid ${color}; padding-left: 14px; vertical-align: top;">
+                        <table cellpadding="0" cellspacing="0" border="0">
+                            <tr>
+                                <td style="font-size: 15px; font-weight: 700; color: #0f172a; letter-spacing: -0.2px;">${fn} ${ln}</td>
+                            </tr>
+                            <tr>
+                                <td style="font-size: 12px; font-weight: 600; color: #64748b; padding-bottom: 6px;">${title} • <strong style="color: ${color};">${company}</strong></td>
+                            </tr>
+                            <tr>
+                                <td style="font-size: 11px; color: #475569;">
+                                    <span style="color: ${color}; font-weight: bold;">P:</span> ${phone}<br />
+                                    <span style="color: ${color}; font-weight: bold;">E:</span> <a href="mailto:${email}" style="color: #475569; text-decoration: none;">${email}</a><br />
+                                    <span style="color: ${color}; font-weight: bold;">A:</span> ${address}
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                ${bannerHTML}
+            </table>`.trim();
+        }
+
+        function updateSignature() {
+            const target = document.getElementById('signature-preview-target');
+            if (target) target.innerHTML = generateSignatureHTML();
+        }
+
+        // Copy HTML Code
+        function copySignatureHTML() {
+            const code = generateSignatureHTML();
+            navigator.clipboard.writeText(code).then(() => {
+                showToast('HTML Signature Code copied to clipboard!');
+            }).catch(() => {
+                showToast('Copied signature code successfully!');
+            });
+        }
+
+        // Copy Visual Signature (For Gmail / Outlook direct paste)
+        function copyVisualSignature() {
+            const target = document.getElementById('signature-preview-target');
+            const range = document.createRange();
+            range.selectNode(target);
+            window.getSelection().removeAllRanges();
+            window.getSelection().addRange(range);
+            document.execCommand('copy');
+            window.getSelection().removeAllRanges();
+            showToast('Visual Signature copied! Paste directly into Gmail/Outlook settings.');
+        }
+
+        function saveTemplate() {
+            showToast('Signature template saved to company presets!');
+        }
+
+        function randomizePhoto() {
+            const random = AVATARS[Math.floor(Math.random() * AVATARS.length)];
+            document.getElementById('input-photo').value = random;
+            updateSignature();
+        }
+
+        // Render Banners List
+        function renderBanners() {
+            const container = document.getElementById('banners-container');
+            if (!container) return;
+
+            container.innerHTML = campaignBanners.map(b => `
+                <div class="bg-white rounded-2xl border border-slate-200/90 shadow-sm overflow-hidden flex flex-col justify-between">
+                    <div class="p-5 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-700 border border-emerald-200">${b.status}</span>
+                            <span class="text-xs text-slate-400 font-medium">CTR: <strong class="text-slate-700">${b.ctr}</strong></span>
+                        </div>
+                        <h3 class="font-bold text-slate-800 text-sm">${b.title}</h3>
+                        <div class="rounded-xl overflow-hidden border border-slate-200/80 bg-slate-100">
+                            <img src="${b.img}" class="w-full h-24 object-cover">
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 text-[11px] pt-1">
+                            <div class="bg-slate-50 p-2 rounded-lg border border-slate-100">
+                                <span class="text-slate-400 block">Impressions</span>
+                                <strong class="text-slate-700 font-bold">${b.impressions}</strong>
+                            </div>
+                            <div class="bg-slate-50 p-2 rounded-lg border border-slate-100">
+                                <span class="text-slate-400 block">Clicks</span>
+                                <strong class="text-slate-700 font-bold">${b.clicks}</strong>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="px-5 py-3 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
+                        <span class="text-[11px] text-slate-400 truncate max-w-[180px]"><i class="fa-solid fa-link text-slate-300"></i> ${b.link}</span>
+                        <button onclick="showToast('Editing ${b.title}...')" class="text-xs text-indigo-600 hover:text-indigo-700 font-bold">Edit</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function deployAllBanners() {
+            showToast('Deployed active campaign banner across all employee email signatures!');
+        }
+
+        // Render Team Table
+        function renderTeamTable(list = teamMembers) {
+            const tbody = document.getElementById('team-table-body');
+            if (!tbody) return;
+
+            tbody.innerHTML = list.map(m => `
+                <tr class="hover:bg-slate-50/60 transition-colors">
+                    <td class="p-4 flex items-center gap-3">
+                        <img src="${m.avatar}" class="w-8 h-8 rounded-full object-cover border border-slate-200">
+                        <div>
+                            <div class="font-bold text-slate-800">${m.name}</div>
+                            <div class="text-[11px] text-slate-400">${m.email}</div>
+                        </div>
+                    </td>
+                    <td class="p-4 font-medium text-slate-700">${m.title}</td>
+                    <td class="p-4">
+                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold ${m.status === 'Installed' ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : 'bg-amber-100 text-amber-700 border border-amber-200'}">
+                            ${m.status}
+                        </span>
+                    </td>
+                    <td class="p-4 font-medium text-slate-500">${m.banner}</td>
+                    <td class="p-4 text-right space-x-2">
+                        <button onclick="showToast('Re-sent invite to ${m.name}')" class="text-indigo-600 hover:underline font-bold">Re-invite</button>
+                        <button onclick="removeMember(${m.id})" class="text-rose-500 hover:underline font-bold">Remove</button>
+                    </td>
+                </tr>
+            `).join('');
+
+            document.getElementById('team-count').innerText = list.length;
+            updateSeatMetrics();
+        }
+
+        function filterTeamTable() {
+            const query = document.getElementById('team-search').value.toLowerCase();
+            const filtered = teamMembers.filter(m => m.name.toLowerCase().includes(query) || m.email.toLowerCase().includes(query));
+            renderTeamTable(filtered);
+        }
+
+        function updateSeatMetrics() {
+            const count = teamMembers.length;
+            const max = 15;
+            const pct = ((count / max) * 100).toFixed(1) + '%';
+
+            document.getElementById('badge-seat-count').innerText = `${count}/${max}`;
+            document.getElementById('sidebar-seat-text').innerText = `${count} / ${max} Seats`;
+            document.getElementById('sidebar-seat-progress').style.width = pct;
+            document.getElementById('team-seats-heading').innerText = `${count} of ${max} Starter Seats Occupied`;
+            document.getElementById('team-seat-percent').innerText = pct;
+            document.getElementById('team-seat-bar').style.width = pct;
+        }
+
+        function removeMember(id) {
+            teamMembers = teamMembers.filter(m => m.id !== id);
+            renderTeamTable();
+            showToast('Team member removed.');
+        }
+
+        // Modals Logic
+        function openNewBannerModal() { document.getElementById('modal-banner').classList.remove('hidden'); }
+        function closeBannerModal() { document.getElementById('modal-banner').classList.add('hidden'); }
+        
+        function submitNewBanner() {
+            const title = document.getElementById('new-banner-title').value || 'New Banner';
+            const img = document.getElementById('new-banner-img').value;
+            const link = document.getElementById('new-banner-link').value || 'https://acmecorp.com';
+
+            campaignBanners.push({
+                id: 'custom-' + Date.now(),
+                title: title,
+                img: img,
+                link: link,
+                status: 'ACTIVE',
+                impressions: '0',
+                clicks: '0',
+                ctr: '0.00%'
+            });
+
+            renderBanners();
+            closeBannerModal();
+            showToast('New campaign banner added and active!');
+        }
+
+        function openInviteModal() { document.getElementById('modal-invite').classList.remove('hidden'); }
+        function closeInviteModal() { document.getElementById('modal-invite').classList.add('hidden'); }
+
+        function submitInviteMember() {
+            const name = document.getElementById('invite-name').value || 'New Member';
+            const email = document.getElementById('invite-email').value || 'member@acmecorp.com';
+            const title = document.getElementById('invite-title').value || 'Team Member';
+
+            teamMembers.push({
+                id: Date.now(),
+                name: name,
+                email: email,
+                title: title,
+                status: 'Pending Invite',
+                avatar: AVATARS[Math.floor(Math.random() * AVATARS.length)],
+                banner: 'Not Synced'
+            });
+
+            renderTeamTable();
+            closeInviteModal();
+            showToast(`Invitation sent to ${email}`);
+        }
+
+        function simulateCSVUpload() {
+            showToast('CSV import simulation: 3 members added!');
+            teamMembers.push(
+                { id: Date.now()+1, name: 'Liam Vance', email: 'liam.v@acmecorp.com', title: 'UX Designer', status: 'Pending Invite', avatar: AVATARS[0], banner: 'Not Synced' },
+                { id: Date.now()+2, name: 'Chloe Bennett', email: 'chloe.b@acmecorp.com', title: 'Content Lead', status: 'Pending Invite', avatar: AVATARS[1], banner: 'Not Synced' }
+            );
+            renderTeamTable();
+        }
+
+        function upgradeToGrowth() {
+            showToast('Upgraded to Growth Plan ($49/mo)! Unlimited seats unlocked.');
+        }
+
+        // Toast Popup Handler
+        function showToast(msg) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'toast-enter pointer-events-auto bg-slate-900 text-white text-xs font-semibold px-4 py-3 rounded-xl shadow-2xl border border-slate-700 flex items-center gap-2.5';
+            toast.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400 text-sm"></i><span>${msg}</span>`;
+            
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.remove('toast-enter');
+                toast.classList.add('toast-exit');
+                setTimeout(() => toast.remove(), 200);
+            }, 3000);
+        }
+
+        // Initialize App State
+        window.onload = function() {
+            updateSignature();
+            renderBanners();
+            renderTeamTable();
+        };
+    </script>
+</body>
+</html>
