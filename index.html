@@ -1,903 +1,220 @@
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth h-full">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SigFlow - Email Signature & Campaign Management SaaS</title>
-
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        brand: {
-                            50: '#eef2ff',
-                            100: '#e0e7ff',
-                            400: '#818cf8',
-                            500: '#6366f1',
-                            600: '#4f46e5',
-                            700: '#4338ca',
-                            800: '#3730a3',
-                            900: '#312e81',
-                        }
-                    },
-                    fontFamily: {
-                        sans: ['Plus Jakarta Sans', 'sans-serif'],
-                    }
-                }
-            }
-        }
-    </script>
-
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
-    <!-- Supabase JS Client v2 -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-    <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; }
-        .glass-card { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); }
-        .glass-nav { background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
-        .hero-gradient { background: radial-gradient(circle at 50% 0%, rgba(79, 70, 229, 0.25) 0%, rgba(15, 23, 42, 1) 70%); }
-        .glow-effect { box-shadow: 0 0 50px -12px rgba(79, 70, 229, 0.5); }
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.6); }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(99, 102, 241, 0.3); border-radius: 4px; }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SigSpoke | Centralized Email Signature Management</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Supabase JS Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body class="bg-slate-950 text-slate-100 antialiased selection:bg-brand-500 selection:text-white h-full flex flex-col">
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col font-sans antialiased">
 
-    <!-- NOTIFICATION TOAST -->
-    <div id="toast-container" class="fixed top-5 right-5 z-[100] flex flex-col gap-2 pointer-events-none"></div>
-
-    <!-- MAIN LANDING PAGE VIEW -->
-    <div id="landing-page-view" class="w-full">
-        <!-- STICKY HEADER -->
-        <header class="fixed top-0 left-0 right-0 z-50 glass-nav transition-all duration-300">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-                <!-- Brand Logo -->
-                <a href="#" class="flex items-center gap-3 group">
-                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-400 flex items-center justify-center text-white font-black text-xl shadow-lg shadow-brand-500/30 group-hover:scale-105 transition-transform">
-                        ⚡
-                    </div>
-                    <div>
-                        <span class="font-extrabold text-xl tracking-tight text-white block leading-none">SigFlow</span>
-                        <span class="text-[10px] text-brand-400 font-bold uppercase tracking-widest">Campaign SaaS</span>
-                    </div>
-                </a>
-
-                <!-- Desktop Nav Links -->
-                <nav class="hidden md:flex items-center gap-8 text-sm font-semibold text-slate-300">
-                    <a href="#features" class="hover:text-white transition-colors">Features</a>
-                    <a href="#demo" class="hover:text-white transition-colors">Live Demo</a>
-                    <a href="#pricing" class="hover:text-white transition-colors">Pricing</a>
-                    <a href="#faq" class="hover:text-white transition-colors">FAQ</a>
-                </nav>
-
-                <!-- Header Actions -->
-                <div class="flex items-center gap-4">
-                    <button onclick="openAuthModal('login')" class="hidden sm:inline-flex items-center gap-2 text-sm font-bold text-slate-300 hover:text-white px-4 py-2 transition-colors">
-                        Sign In
-                    </button>
-                    <button onclick="openAuthModal('signup')" class="bg-gradient-to-r from-brand-600 to-indigo-500 hover:from-brand-500 hover:to-indigo-400 text-white font-bold text-sm px-5 py-2.5 rounded-xl shadow-lg shadow-brand-500/25 transition-all hover:scale-[1.02] flex items-center gap-2">
-                        <span>Get Started</span>
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-                    </button>
-                </div>
-            </div>
-        </header>
-
-        <!-- HERO SECTION -->
-        <section class="relative pt-32 pb-20 md:pt-44 md:pb-32 hero-gradient overflow-hidden">
-            <div class="absolute inset-0 bg-[linear-gradient(to_right,#1e293b15_1px,transparent_1px),linear-gradient(to_bottom,#1e293b15_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]"></div>
-
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
-                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-card text-brand-300 text-xs sm:text-sm font-semibold mb-8 border border-brand-500/30">
-                    <span class="flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                    <span>Next-Gen Email Signature Marketing Platform</span>
-                    <span class="text-slate-500">|</span>
-                    <span class="text-white hover:underline cursor-pointer" onclick="openAuthModal('signup')">Explore v2.0 →</span>
-                </div>
-
-                <h1 class="text-4xl sm:text-6xl lg:text-7xl font-extrabold text-white tracking-tight leading-[1.1] max-w-5xl mx-auto mb-6">
-                    Turn Every Employee Email Into a <span class="bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 via-brand-300 to-purple-400">Live Marketing Channel</span>
-                </h1>
-
-                <p class="text-lg sm:text-xl text-slate-400 max-w-2xl mx-auto mb-10 font-medium leading-relaxed">
-                    Centralize email signature management, deploy real-time banner promotions across your team, and sync with isolated Supabase database accounts.
-                </p>
-
-                <div class="flex flex-col sm:flex-row items-center justify-center gap-4 max-w-md mx-auto mb-16">
-                    <button onclick="openAuthModal('signup')" class="w-full sm:w-auto bg-gradient-to-r from-brand-600 to-indigo-500 hover:from-brand-500 hover:to-indigo-400 text-white font-bold text-base px-8 py-4 rounded-xl shadow-xl shadow-brand-500/30 transition-all hover:scale-[1.02] flex items-center justify-center gap-2">
-                        <span>Start Free Workspace</span>
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
-                    </button>
-                    <a href="#demo" class="w-full sm:w-auto glass-card hover:bg-white/10 text-slate-200 font-bold text-base px-8 py-4 rounded-xl transition-all flex items-center justify-center gap-2 border border-slate-800">
-                        <span>Try Interactive Demo</span>
-                    </a>
-                </div>
-
-                <!-- Interactive Hero Mockup -->
-                <div class="relative max-w-5xl mx-auto rounded-2xl p-2 bg-slate-900/80 border border-slate-800 shadow-2xl glow-effect">
-                    <div class="bg-slate-900 rounded-xl overflow-hidden p-4 sm:p-6 text-left">
-                        <div class="flex items-center justify-between border-b border-slate-800 pb-4 mb-6">
-                            <div class="flex items-center gap-2">
-                                <span class="w-3 h-3 rounded-full bg-rose-500/80"></span>
-                                <span class="w-3 h-3 rounded-full bg-amber-500/80"></span>
-                                <span class="w-3 h-3 rounded-full bg-emerald-500/80"></span>
-                                <span class="text-xs text-slate-500 font-mono ml-2">app.sigflow.io / signature-builder</span>
-                            </div>
-                            <span class="text-xs font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full flex items-center gap-1.5">
-                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Supabase Auth Ready
-                            </span>
-                        </div>
-
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
-                            <div class="space-y-4">
-                                <div class="text-xs font-bold uppercase tracking-wider text-brand-400">Live Campaign Dynamic Controls</div>
-                                <h3 class="text-xl font-bold text-white">Select Active Campaign</h3>
-                                <div class="space-y-2">
-                                    <button onclick="setHeroPreset('q4')" id="preset-q4" class="w-full p-3 rounded-xl bg-brand-600/20 border border-brand-500/50 text-left transition-all flex items-center justify-between">
-                                        <div>
-                                            <p class="text-xs font-bold text-white">Q4 Strategic Growth Campaign</p>
-                                            <p class="text-[11px] text-slate-400">Enterprise Hero Banner</p>
-                                        </div>
-                                        <span class="text-xs font-bold bg-brand-500 text-white px-2 py-0.5 rounded-md">Active</span>
-                                    </button>
-                                    <button onclick="setHeroPreset('summit')" id="preset-summit" class="w-full p-3 rounded-xl bg-slate-800/50 border border-slate-700/50 text-left transition-all flex items-center justify-between hover:bg-slate-800">
-                                        <div>
-                                            <p class="text-xs font-bold text-white">Annual Tech Summit 2026</p>
-                                            <p class="text-[11px] text-slate-400">Event Registration Promo</p>
-                                        </div>
-                                        <span class="text-xs text-slate-400">Select</span>
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- Live Signature Card Preview -->
-                            <div class="bg-white rounded-xl p-5 text-slate-900 font-sans shadow-lg">
-                                <p id="hero-pv-name" class="text-base font-extrabold text-slate-900 leading-tight">Sarah Jenkins</p>
-                                <p id="hero-pv-title" class="text-xs font-bold text-brand-600 mb-2">VP of Growth & Strategy</p>
-                                <p class="text-xs text-slate-600 mb-3">📧 sarah@acmecorp.com | 📞 +1 (555) 234-5678</p>
-                                <div class="rounded-lg overflow-hidden border border-slate-200">
-                                    <img id="hero-pv-img" src="https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&w=600&q=80" class="w-full h-24 object-cover">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- FEATURES SECTION -->
-        <section id="features" class="py-24 relative">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="text-center max-w-3xl mx-auto mb-16">
-                    <h2 class="text-xs font-extrabold text-brand-400 uppercase tracking-widest mb-3">Enterprise Capabilities</h2>
-                    <p class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">Everything you need to turn signatures into revenue</p>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                    <div class="glass-card p-6 rounded-2xl hover:border-brand-500/50 transition-all hover:-translate-y-1">
-                        <div class="w-12 h-12 rounded-xl bg-brand-500/10 border border-brand-500/20 text-brand-400 flex items-center justify-center text-2xl mb-4">👥</div>
-                        <h3 class="text-lg font-bold text-white mb-2">User Workspace Auth</h3>
-                        <p class="text-sm text-slate-400 leading-relaxed">Secure account authentication ensuring every team's roster remains isolated and private.</p>
-                    </div>
-
-                    <div class="glass-card p-6 rounded-2xl hover:border-brand-500/50 transition-all hover:-translate-y-1">
-                        <div class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center text-2xl mb-4">📢</div>
-                        <h3 class="text-lg font-bold text-white mb-2">Dynamic Banners</h3>
-                        <p class="text-sm text-slate-400 leading-relaxed">Push promotional campaign banners live across all active signatures with a single click.</p>
-                    </div>
-
-                    <div class="glass-card p-6 rounded-2xl hover:border-brand-500/50 transition-all hover:-translate-y-1">
-                        <div class="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-400 flex items-center justify-center text-2xl mb-4">📋</div>
-                        <h3 class="text-lg font-bold text-white mb-2">Instant Clipboard Copy</h3>
-                        <p class="text-sm text-slate-400 leading-relaxed">Export HTML code or rich formatted HTML signatures ready for instant Gmail and Outlook pasting.</p>
-                    </div>
-
-                    <div class="glass-card p-6 rounded-2xl hover:border-brand-500/50 transition-all hover:-translate-y-1">
-                        <div class="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center text-2xl mb-4">⚡</div>
-                        <h3 class="text-lg font-bold text-white mb-2">Supabase Sync</h3>
-                        <p class="text-sm text-slate-400 leading-relaxed">Real-time bi-directional database sync ensuring profile modifications update instantly.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- DEMO SECTION -->
-        <section id="demo" class="py-20 bg-slate-900/60 border-y border-slate-800">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                    <div>
-                        <span class="text-xs font-bold text-brand-400 uppercase tracking-widest block mb-2">Interactive Preview</span>
-                        <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mb-4">Try the Live Signature Customizer</h2>
-                        <p class="text-slate-400 text-base mb-6">See how easy it is to customize individual email profiles and pair them with active company campaigns.</p>
-                        
-                        <div class="space-y-4">
-                            <div>
-                                <label class="block text-xs font-bold text-slate-300 uppercase mb-1">Full Name</label>
-                                <input type="text" id="demo-name" value="Sarah Jenkins" oninput="demoUpdate()" class="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-brand-500 text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold text-slate-300 uppercase mb-1">Job Title</label>
-                                <input type="text" id="demo-title" value="VP of Growth & Strategy" oninput="demoUpdate()" class="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-brand-500 text-sm">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="glass-card p-6 sm:p-8 rounded-2xl border border-slate-700/60 shadow-2xl">
-                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 border-b border-slate-800 pb-2">Output Preview</p>
-                        <div class="bg-white rounded-xl p-6 text-slate-900 font-sans shadow-inner">
-                            <p id="demo-pv-name" class="text-lg font-extrabold text-slate-900">Sarah Jenkins</p>
-                            <p id="demo-pv-title" class="text-xs font-bold text-brand-600 mb-3">VP of Growth & Strategy</p>
-                            <p class="text-xs text-slate-600 mb-4">📧 sarah@acmecorp.com | 📞 +1 (555) 234-5678</p>
-                            <div class="rounded-xl overflow-hidden border border-slate-200">
-                                <img id="demo-pv-img" src="https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&w=600&q=80" class="w-full h-28 object-cover">
-                            </div>
-                        </div>
-                        <button onclick="openAuthModal('signup')" class="w-full mt-6 bg-brand-600 hover:bg-brand-500 text-white font-bold py-3 rounded-xl text-sm transition-all shadow-lg shadow-brand-500/20 flex items-center justify-center gap-2">
-                            🚀 Sign Up & Deploy Profile to Supabase
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- PRICING TIERS -->
-        <section id="pricing" class="py-24 relative">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="text-center max-w-3xl mx-auto mb-16">
-                    <h2 class="text-xs font-extrabold text-brand-400 uppercase tracking-widest mb-3">Flexible Billing</h2>
-                    <p class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mb-4">Simple, transparent plans for teams of any size</p>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
-                    <div class="glass-card p-8 rounded-2xl flex flex-col justify-between border border-slate-800">
-                        <div>
-                            <h3 class="text-xl font-bold text-white mb-2">Starter Tier</h3>
-                            <p class="text-xs text-slate-400 mb-6">Ideal for small teams and startups.</p>
-                            <div class="mb-6">
-                                <span class="text-4xl font-black text-white">$19</span>
-                                <span class="text-slate-400 text-xs font-semibold">/ month</span>
-                            </div>
-                            <ul class="space-y-3 text-sm text-slate-300 mb-8">
-                                <li class="flex items-center gap-2"><span class="text-emerald-400 font-bold">✓</span> Up to 15 Active Seats</li>
-                                <li class="flex items-center gap-2"><span class="text-emerald-400 font-bold">✓</span> Supabase Live DB Sync</li>
-                                <li class="flex items-center gap-2"><span class="text-emerald-400 font-bold">✓</span> Isolated User Workspace</li>
-                            </ul>
-                        </div>
-                        <button onclick="openAuthModal('signup')" class="w-full py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-sm transition-colors">
-                            Start 14-Day Free Trial
-                        </button>
-                    </div>
-
-                    <div class="glass-card p-8 rounded-2xl flex flex-col justify-between border-2 border-brand-500 relative shadow-2xl glow-effect">
-                        <span class="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-brand-600 to-indigo-500 text-white text-[11px] font-extrabold px-3 py-1 rounded-full uppercase tracking-wider">
-                            Most Popular
-                        </span>
-                        <div>
-                            <h3 class="text-xl font-bold text-white mb-2">Growth Tier</h3>
-                            <p class="text-xs text-brand-300 mb-6">Built for expanding sales and marketing teams.</p>
-                            <div class="mb-6">
-                                <span class="text-4xl font-black text-white">$49</span>
-                                <span class="text-slate-400 text-xs font-semibold">/ month</span>
-                            </div>
-                            <ul class="space-y-3 text-sm text-slate-300 mb-8">
-                                <li class="flex items-center gap-2"><span class="text-emerald-400 font-bold">✓</span> Up to 50 Active Seats</li>
-                                <li class="flex items-center gap-2"><span class="text-emerald-400 font-bold">✓</span> Unlimited Campaign Banners</li>
-                                <li class="flex items-center gap-2"><span class="text-emerald-400 font-bold">✓</span> Dedicated Auth Account</li>
-                            </ul>
-                        </div>
-                        <button onclick="openAuthModal('signup')" class="w-full py-3 rounded-xl bg-gradient-to-r from-brand-600 to-indigo-500 hover:from-brand-500 hover:to-indigo-400 text-white font-bold text-sm transition-all shadow-lg shadow-brand-500/25">
-                            Launch Growth Workspace
-                        </button>
-                    </div>
-
-                    <div class="glass-card p-8 rounded-2xl flex flex-col justify-between border border-slate-800">
-                        <div>
-                            <h3 class="text-xl font-bold text-white mb-2">Enterprise</h3>
-                            <p class="text-xs text-slate-400 mb-6">Custom deployment for large organizations.</p>
-                            <div class="mb-6">
-                                <span class="text-4xl font-black text-white">$129</span>
-                                <span class="text-slate-400 text-xs font-semibold">/ month</span>
-                            </div>
-                            <ul class="space-y-3 text-sm text-slate-300 mb-8">
-                                <li class="flex items-center gap-2"><span class="text-emerald-400 font-bold">✓</span> Unlimited Team Seats</li>
-                                <li class="flex items-center gap-2"><span class="text-emerald-400 font-bold">✓</span> Custom Supabase Connector</li>
-                                <li class="flex items-center gap-2"><span class="text-emerald-400 font-bold">✓</span> 99.99% SLA Guarantee</li>
-                            </ul>
-                        </div>
-                        <button onclick="openAuthModal('signup')" class="w-full py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-sm transition-colors">
-                            Contact Sales
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- FOOTER -->
-        <footer class="bg-slate-900 border-t border-slate-800 py-16 text-center relative overflow-hidden">
-            <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-                <h2 class="text-3xl sm:text-5xl font-black text-white tracking-tight mb-6">
-                    Ready to Upgrade Your Team's Signatures?
-                </h2>
-                <button onclick="openAuthModal('signup')" class="bg-gradient-to-r from-brand-600 to-indigo-500 hover:from-brand-500 hover:to-indigo-400 text-white font-extrabold text-base px-10 py-4 rounded-xl shadow-2xl shadow-brand-500/30 transition-all hover:scale-105 inline-flex items-center gap-2">
-                    <span>Create Your Account Now</span>
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-                </button>
-                <p class="text-xs text-slate-500 mt-12">© 2026 SigFlow Inc. Built with Supabase Auth & Tailwind CSS.</p>
-            </div>
-        </footer>
-    </div>
-
-    <!-- DASHBOARD APP VIEW (AUTHENTICATED) -->
-    <div id="app-dashboard-view" class="hidden flex-1 flex flex-col md:flex-row h-full overflow-hidden bg-slate-950">
-        <!-- SIDEBAR NAVIGATION -->
-        <aside class="w-full md:w-64 bg-slate-900 border-b md:border-b-0 md:border-r border-slate-800 flex flex-col justify-between shrink-0">
-            <div>
-                <!-- Brand Header -->
-                <div class="p-6 border-b border-slate-800 flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-400 flex items-center justify-center text-white font-black text-lg shadow-lg shadow-brand-500/20">
-                            ⚡
-                        </div>
-                        <div>
-                            <span class="font-extrabold text-lg text-white block leading-none">SigFlow</span>
-                            <span class="text-[10px] text-brand-400 font-bold uppercase tracking-widest">Dashboard</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Nav Menu -->
-                <nav class="p-4 space-y-1">
-                    <button onclick="switchTab('builder')" id="nav-builder" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold bg-brand-600 text-white transition-all">
-                        <span>✏️</span> Signature Builder
-                    </button>
-                    <button onclick="switchTab('roster')" id="nav-roster" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all">
-                        <span>👥</span> Team Roster
-                    </button>
-                    <button onclick="switchTab('banners')" id="nav-banners" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all">
-                        <span>📢</span> Campaign Banners
-                    </button>
-                    <button onclick="switchTab('settings')" id="nav-settings" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all">
-                        <span>⚙️</span> Settings & Billing
-                    </button>
-                </nav>
-            </div>
-
-            <!-- User Auth Profile Footer -->
-            <div class="p-4 border-t border-slate-800 bg-slate-950/40">
-                <div class="flex items-center gap-3 mb-3">
-                    <div class="w-8 h-8 rounded-full bg-brand-600/30 text-brand-300 border border-brand-500/30 flex items-center justify-center text-xs font-bold" id="user-avatar-initials">
-                        👤
-                    </div>
-                    <div class="overflow-hidden">
-                        <p class="text-xs font-bold text-white truncate" id="user-display-email">user@domain.com</p>
-                        <p class="text-[10px] text-emerald-400 font-medium">● Connected Workspace</p>
-                    </div>
-                </div>
-                <div class="flex gap-2">
-                    <button onclick="showLandingPage()" class="w-1/2 py-2 px-3 text-xs font-bold text-slate-400 bg-slate-800 hover:bg-slate-700 rounded-lg transition-colors">
-                        🌐 Website
-                    </button>
-                    <button onclick="handleSignOut()" class="w-1/2 py-2 px-3 text-xs font-bold text-rose-300 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 rounded-lg transition-colors">
-                        🚪 Log Out
-                    </button>
-                </div>
-            </div>
-        </aside>
-
-        <!-- DASHBOARD CONTENT AREA -->
-        <main class="flex-1 overflow-y-auto custom-scrollbar p-6 md:p-10">
-            <!-- TAB 1: SIGNATURE BUILDER -->
-            <div id="tab-builder" class="max-w-6xl mx-auto space-y-8">
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-6">
-                    <div>
-                        <h1 class="text-2xl font-extrabold text-white">Signature Customizer</h1>
-                        <p class="text-xs text-slate-400">Design your profile card and sync to your company Supabase account.</p>
-                    </div>
-                    <button onclick="saveProfileToSupabase()" class="bg-brand-600 hover:bg-brand-500 text-white font-bold text-sm px-6 py-3 rounded-xl shadow-lg shadow-brand-500/25 transition-all flex items-center gap-2">
-                        <span>💾 Save Profile to Supabase</span>
-                    </button>
-                </div>
-
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    <!-- Form Controls -->
-                    <div class="glass-card p-6 rounded-2xl border border-slate-800 space-y-4">
-                        <h3 class="text-sm font-bold text-brand-400 uppercase tracking-wider mb-2">Profile Information</h3>
-                        
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-xs font-bold text-slate-300 mb-1">Full Name</label>
-                                <input type="text" id="input-name" value="Sarah Jenkins" oninput="updateSignaturePreview()" class="w-full px-4 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white text-sm focus:outline-none focus:border-brand-500">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold text-slate-300 mb-1">Job Title</label>
-                                <input type="text" id="input-title" value="VP of Growth & Strategy" oninput="updateSignaturePreview()" class="w-full px-4 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white text-sm focus:outline-none focus:border-brand-500">
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-xs font-bold text-slate-300 mb-1">Email Address</label>
-                                <input type="email" id="input-email" value="sarah@acmecorp.com" oninput="updateSignaturePreview()" class="w-full px-4 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white text-sm focus:outline-none focus:border-brand-500">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold text-slate-300 mb-1">Phone Number</label>
-                                <input type="text" id="input-phone" value="+1 (555) 234-5678" oninput="updateSignaturePreview()" class="w-full px-4 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white text-sm focus:outline-none focus:border-brand-500">
-                            </div>
-                        </div>
-
-                        <div>
-                            <label class="block text-xs font-bold text-slate-300 mb-1">Active Campaign Banner</label>
-                            <select id="input-banner" onchange="updateSignaturePreview()" class="w-full px-4 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white text-sm focus:outline-none focus:border-brand-500">
-                                <option value="https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&w=600&q=80">Q4 Strategic Growth Promo Banner</option>
-                                <option value="https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=600&q=80">Annual Tech Summit 2026 Promo Banner</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <!-- Live Live Canvas Preview -->
-                    <div class="space-y-4">
-                        <div class="glass-card p-6 rounded-2xl border border-slate-800">
-                            <div class="flex items-center justify-between mb-4 border-b border-slate-800 pb-3">
-                                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Live HTML Signature Output</span>
-                                <span class="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">Ready for Export</span>
-                            </div>
-
-                            <!-- Formatted Signature HTML Container -->
-                            <div id="signature-html-container" class="bg-white rounded-xl p-6 text-slate-900 font-sans shadow-lg">
-                                <p id="pv-name" class="text-lg font-extrabold text-slate-900 leading-tight">Sarah Jenkins</p>
-                                <p id="pv-title" class="text-xs font-bold text-brand-600 mb-3">VP of Growth & Strategy</p>
-                                <p class="text-xs text-slate-600 mb-4">
-                                    📧 <span id="pv-email">sarah@acmecorp.com</span> | 📞 <span id="pv-phone">+1 (555) 234-5678</span>
-                                </p>
-                                <div class="rounded-xl overflow-hidden border border-slate-200">
-                                    <img id="pv-banner" src="https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&w=600&q=80" class="w-full h-28 object-cover block">
-                                </div>
-                            </div>
-
-                            <!-- Export Action Buttons -->
-                            <div class="grid grid-cols-2 gap-3 mt-6">
-                                <button onclick="copyRichSignature()" class="py-3 px-4 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs rounded-xl transition-all flex items-center justify-center gap-2 border border-slate-700">
-                                    📋 Copy Rich HTML (Gmail)
-                                </button>
-                                <button onclick="copyRawSignatureHTML()" class="py-3 px-4 bg-brand-600/20 hover:bg-brand-600/30 text-brand-300 border border-brand-500/30 font-bold text-xs rounded-xl transition-all flex items-center justify-center gap-2">
-                                    💻 Copy Raw HTML Code
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- TAB 2: TEAM ROSTER -->
-            <div id="tab-roster" class="hidden max-w-6xl mx-auto space-y-8">
-                <div class="flex items-center justify-between border-b border-slate-800 pb-6">
-                    <div>
-                        <h1 class="text-2xl font-extrabold text-white">Workspace Team Roster</h1>
-                        <p class="text-xs text-slate-400">Manage employee profile cards connected to your authenticated account.</p>
-                    </div>
-                    <button onclick="fetchTeamRoster()" class="text-xs font-bold text-brand-400 bg-brand-500/10 border border-brand-500/20 px-4 py-2 rounded-xl hover:bg-brand-500/20 transition-all flex items-center gap-2">
-                        🔄 Refresh Database
-                    </button>
-                </div>
-
-                <div id="roster-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <!-- Dynamic Roster Cards Inserted Here -->
-                </div>
-            </div>
-
-            <!-- TAB 3: CAMPAIGN BANNERS -->
-            <div id="tab-banners" class="hidden max-w-6xl mx-auto space-y-8">
-                <div class="border-b border-slate-800 pb-6">
-                    <h1 class="text-2xl font-extrabold text-white">Campaign Banner Manager</h1>
-                    <p class="text-xs text-slate-400">Select active promotional banners for team signatures.</p>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="glass-card p-6 rounded-2xl border border-brand-500/50 relative overflow-hidden">
-                        <span class="absolute top-4 right-4 text-[10px] font-bold bg-brand-500 text-white px-2 py-0.5 rounded uppercase">Active Banner</span>
-                        <h3 class="font-bold text-white text-base mb-1">Q4 Strategic Growth Campaign</h3>
-                        <p class="text-xs text-slate-400 mb-4">Enterprise promotional header image.</p>
-                        <img src="https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&w=600&q=80" class="w-full h-32 object-cover rounded-xl mb-4">
-                        <button onclick="selectBannerForBuilder('https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&w=600&q=80')" class="w-full py-2.5 bg-brand-600 text-white font-bold text-xs rounded-xl hover:bg-brand-500 transition-colors">
-                            Apply to Signature Builder
-                        </button>
-                    </div>
-
-                    <div class="glass-card p-6 rounded-2xl border border-slate-800">
-                        <h3 class="font-bold text-white text-base mb-1">Annual Tech Summit 2026</h3>
-                        <p class="text-xs text-slate-400 mb-4">Event registration promo banner.</p>
-                        <img src="https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=600&q=80" class="w-full h-32 object-cover rounded-xl mb-4">
-                        <button onclick="selectBannerForBuilder('https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=600&q=80')" class="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs rounded-xl transition-colors">
-                            Apply to Signature Builder
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- TAB 4: SETTINGS & BILLING -->
-            <div id="tab-settings" class="hidden max-w-4xl mx-auto space-y-8">
-                <div class="border-b border-slate-800 pb-6">
-                    <h1 class="text-2xl font-extrabold text-white">Settings & Supabase Config</h1>
-                    <p class="text-xs text-slate-400">Configure database credentials and account subscription settings.</p>
-                </div>
-
-                <div class="glass-card p-6 rounded-2xl border border-slate-800 space-y-4">
-                    <h3 class="text-sm font-bold text-white uppercase tracking-wider">Connected Account Overview</h3>
-                    <div class="p-4 bg-slate-900 rounded-xl border border-slate-800 space-y-2 text-xs">
-                        <p class="text-slate-400">Account Email: <span id="settings-user-email" class="font-mono text-white">user@domain.com</span></p>
-                        <p class="text-slate-400">User ID: <span id="settings-user-id" class="font-mono text-brand-400">Checking session...</span></p>
-                        <p class="text-slate-400">Current Plan: <span class="text-emerald-400 font-bold">Growth Tier ($49/mo Trial)</span></p>
-                    </div>
-                </div>
-            </div>
-        </main>
-    </div>
-
-    <!-- SUPABASE AUTH MODAL -->
-    <div id="auth-modal" class="fixed inset-0 z-[90] hidden items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
-        <div class="glass-card w-full max-w-md p-8 rounded-2xl border border-slate-800 shadow-2xl relative">
-            <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-lg font-bold">✕</button>
-            
-            <div class="text-center mb-6">
-                <div class="w-12 h-12 rounded-xl bg-brand-600/20 text-brand-400 flex items-center justify-center text-2xl mx-auto mb-3 border border-brand-500/30">⚡</div>
-                <h2 id="auth-modal-title" class="text-2xl font-extrabold text-white">Welcome to SigFlow</h2>
-                <p id="auth-modal-subtitle" class="text-xs text-slate-400 mt-1">Sign in to manage your workspace signatures.</p>
-            </div>
-
-            <!-- Auth Form -->
-            <form onsubmit="handleAuthSubmit(event)" class="space-y-4">
-                <div>
-                    <label class="block text-xs font-bold text-slate-300 mb-1 uppercase">Email Address</label>
-                    <input type="email" id="auth-email" required placeholder="name@company.com" class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-white text-sm focus:outline-none focus:border-brand-500">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-300 mb-1 uppercase">Password</label>
-                    <input type="password" id="auth-password" required placeholder="••••••••" class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-white text-sm focus:outline-none focus:border-brand-500">
-                </div>
-
-                <button type="submit" id="auth-submit-btn" class="w-full py-3.5 bg-gradient-to-r from-brand-600 to-indigo-500 hover:from-brand-500 hover:to-indigo-400 text-white font-extrabold text-sm rounded-xl shadow-lg shadow-brand-500/30 transition-all mt-2">
-                    Sign In
-                </button>
-            </form>
-
-            <div class="text-center mt-6 pt-4 border-t border-slate-800 text-xs text-slate-400">
-                <span id="auth-toggle-text">Don't have a workspace yet?</span>
-                <button onclick="toggleAuthMode()" id="auth-toggle-btn" class="text-brand-400 font-bold hover:underline ml-1">Sign Up</button>
-            </div>
+  <!-- NAVIGATION HEADER -->
+  <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-9 h-9 rounded-lg bg-indigo-600 flex items-center justify-center font-bold text-white text-xl shadow-lg shadow-indigo-500/30">
+          S
         </div>
+        <span class="text-xl font-bold tracking-tight text-white">SigSpoke</span>
+      </div>
+      
+      <div id="auth-status" class="flex items-center space-x-4">
+        <span id="user-email-display" class="text-sm text-slate-400 hidden"></span>
+        <button id="auth-action-btn" onclick="toggleAuthModal()" class="bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors shadow-md">
+          Sign In
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- HERO SECTION -->
+  <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 flex flex-col items-center text-center">
+    <div class="inline-flex items-center space-x-2 bg-indigo-500/10 border border-indigo-500/20 px-3 py-1 rounded-full text-indigo-400 text-xs font-semibold uppercase tracking-wider mb-6">
+      <span>Enterprise Signature Infrastructure</span>
+    </div>
+    
+    <h1 class="text-4xl sm:text-6xl font-extrabold tracking-tight text-white max-w-4xl leading-tight">
+      Broadcasting Your Brand Across Every Email Signature.
+    </h1>
+    
+    <p class="mt-6 text-lg sm:text-xl text-slate-400 max-w-2xl leading-relaxed">
+      Centralized email signature management for modern teams. Sync marketing banners, titles, and rosters instantly from one unified dashboard.
+    </p>
+
+    <!-- ACTION BUTTONS -->
+    <div class="mt-10 flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+      <button onclick="toggleAuthModal()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-8 py-3.5 rounded-xl transition-all shadow-lg shadow-indigo-600/25">
+        Get Started Free
+      </button>
+      <a href="#features" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-semibold px-8 py-3.5 rounded-xl transition-colors">
+        Explore Dashboard
+      </a>
     </div>
 
-    <!-- APPLICATION LOGIC SCRIPTS -->
-    <script>
-        // SUPABASE CLIENT INITIALIZATION
-        // Placeholder defaults fallback gracefully if env vars aren't injected yet
-        const SUPABASE_URL = 'https://YOUR_SUPABASE_PROJECT_URL.supabase.co';
-        const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
-        
-        let supabaseClient = null;
-        let currentUser = null;
-        let authMode = 'login'; // 'login' or 'signup'
+    <!-- APP DEMO / DASHBOARD CARD -->
+    <div id="features" class="mt-16 w-full max-w-5xl bg-slate-800/50 border border-slate-700/60 rounded-2xl p-6 sm:p-10 shadow-2xl backdrop-blur text-left">
+      <div class="flex items-center justify-between border-b border-slate-700/60 pb-6 mb-6">
+        <div>
+          <h2 class="text-xl font-bold text-white">SigSpoke Admin Hub</h2>
+          <p class="text-sm text-slate-400">Manage team banners and automated roster deployments</p>
+        </div>
+        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+          ● Live Sync
+        </span>
+      </div>
 
-        try {
-            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        } catch (e) {
-            console.warn('Supabase initialization waiting for valid config.');
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="bg-slate-900/60 p-5 rounded-xl border border-slate-800">
+          <div class="text-indigo-400 font-semibold mb-1">1. Team Banners</div>
+          <p class="text-xs text-slate-400">Push promotional campaigns and live banners to every sent email.</p>
+        </div>
+        <div class="bg-slate-900/60 p-5 rounded-xl border border-slate-800">
+          <div class="text-indigo-400 font-semibold mb-1">2. Centralized Roster</div>
+          <p class="text-xs text-slate-400">Auto-isolate employee signatures by department and user role.</p>
+        </div>
+        <div class="bg-slate-900/60 p-5 rounded-xl border border-slate-800">
+          <div class="text-indigo-400 font-semibold mb-1">3. One-Click Sync</div>
+          <p class="text-xs text-slate-400">Deploy changes across Google Workspace and Outlook seamlessly.</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- AUTH MODAL -->
+  <div id="auth-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 sm:p-8 w-full max-w-md shadow-2xl relative">
+      <button onclick="toggleAuthModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-xl font-bold">
+        &times;
+      </button>
+      
+      <h3 class="text-2xl font-bold text-white mb-2">Welcome to SigSpoke</h3>
+      <p class="text-sm text-slate-400 mb-6">Sign in or register your admin account</p>
+
+      <form id="auth-form" onsubmit="handleAuth(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-medium text-slate-300 mb-1">Email Address</label>
+          <input type="email" id="auth-email" required placeholder="admin@company.com" 
+            class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 text-sm"/>
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-300 mb-1">Password</label>
+          <input type="password" id="auth-password" required placeholder="••••••••" 
+            class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 text-sm"/>
+        </div>
+
+        <button type="submit" id="auth-submit-btn" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-3 rounded-lg transition-colors text-sm shadow-md mt-2">
+          Sign In / Register
+        </button>
+      </form>
+
+      <p id="auth-message" class="text-xs text-center mt-4 hidden"></p>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="border-t border-slate-800 py-8 text-center text-xs text-slate-500">
+    <div class="max-w-7xl mx-auto px-4">
+      <p>&copy; 2026 SigSpoke. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <!-- APPLICATION LOGIC & SUPABASE AUTH -->
+  <script>
+    // Initialize Supabase Client
+    // Replace SUPABASE_URL and SUPABASE_ANON_KEY with your project credentials
+    const SUPABASE_URL = "YOUR_SUPABASE_URL";
+    const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
+    
+    let supabase = null;
+    if (SUPABASE_URL !== "YOUR_SUPABASE_URL") {
+      supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    }
+
+    function toggleAuthModal() {
+      const modal = document.getElementById("auth-modal");
+      modal.classList.toggle("hidden");
+      modal.classList.toggle("flex");
+    }
+
+    async function handleAuth(event) {
+      event.preventDefault();
+      const email = document.getElementById("auth-email").value;
+      const password = document.getElementById("auth-password").value;
+      const messageEl = document.getElementById("auth-message");
+
+      if (!supabase) {
+        messageEl.textContent = "Please set your Supabase API keys in the script.";
+        messageEl.className = "text-xs text-center mt-4 text-amber-400";
+        messageEl.classList.remove("hidden");
+        return;
+      }
+
+      messageEl.textContent = "Processing...";
+      messageEl.className = "text-xs text-center mt-4 text-slate-400";
+      messageEl.classList.remove("hidden");
+
+      // Try signing in first
+      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+
+      if (signInError) {
+        // If sign in fails, attempt sign up
+        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({ 
+          email, 
+          password,
+          options: { emailRedirectTo: 'https://sigspoke.com' }
+        });
+
+        if (signUpError) {
+          messageEl.textContent = signUpError.message;
+          messageEl.className = "text-xs text-center mt-4 text-rose-400";
+        } else {
+          messageEl.textContent = "Account created! Check your email to confirm registration.";
+          messageEl.className = "text-xs text-center mt-4 text-emerald-400";
         }
+      } else {
+        messageEl.textContent = "Signed in successfully!";
+        messageEl.className = "text-xs text-center mt-4 text-emerald-400";
+        setTimeout(() => {
+          toggleAuthModal();
+          updateUIForUser(signInData.user);
+        }, 1000);
+      }
+    }
 
-        // INITIALIZATION ON WINDOW LOAD
-        window.onload = async function() {
-            if (supabaseClient) {
-                // Subscribe to Auth State Changes
-                supabaseClient.auth.onAuthStateChange((event, session) => {
-                    if (session && session.user) {
-                        currentUser = session.user;
-                        updateAuthenticatedUI(currentUser);
-                    } else {
-                        currentUser = null;
-                        updateUnauthenticatedUI();
-                    }
-                });
+    function updateUIForUser(user) {
+      if (user) {
+        document.getElementById("user-email-display").textContent = user.email;
+        document.getElementById("user-email-display").classList.remove("hidden");
+        document.getElementById("auth-action-btn").textContent = "Sign Out";
+        document.getElementById("auth-action-btn").onclick = handleSignOut;
+      } else {
+        document.getElementById("user-email-display").classList.add("hidden");
+        document.getElementById("auth-action-btn").textContent = "Sign In";
+        document.getElementById("auth-action-btn").onclick = toggleAuthModal;
+      }
+    }
 
-                // Get Initial Session
-                const { data: { session } } = await supabaseClient.auth.getSession();
-                if (session && session.user) {
-                    currentUser = session.user;
-                    updateAuthenticatedUI(currentUser);
-                }
-            }
+    async function handleSignOut() {
+      if (supabase) {
+        await supabase.auth.signOut();
+      }
+      updateUIForUser(null);
+    }
 
-            updateSignaturePreview();
-        };
-
-        // UI STATE SWITCHERS
-        function updateAuthenticatedUI(user) {
-            document.getElementById('user-display-email').innerText = user.email;
-            document.getElementById('settings-user-email').innerText = user.email;
-            document.getElementById('settings-user-id').innerText = user.id;
-            document.getElementById('user-avatar-initials').innerText = user.email.substring(0, 2).toUpperCase();
-
-            // Populate builder default email
-            document.getElementById('input-email').value = user.email;
-            updateSignaturePreview();
-            fetchTeamRoster();
+    // Check existing session on boot
+    window.addEventListener("DOMContentLoaded", async () => {
+      if (supabase) {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          updateUIForUser(session.user);
         }
-
-        function updateUnauthenticatedUI() {
-            document.getElementById('user-display-email').innerText = "Not Authenticated";
-            document.getElementById('settings-user-email').innerText = "Not Signed In";
-            document.getElementById('settings-user-id').innerText = "N/A";
-        }
-
-        function launchDashboard() {
-            if (!currentUser) {
-                openAuthModal('login');
-                showToast('Please sign in to access the dashboard workspace.', 'info');
-                return;
-            }
-            document.getElementById('landing-page-view').classList.add('hidden');
-            document.getElementById('app-dashboard-view').classList.remove('hidden');
-        }
-
-        function showLandingPage() {
-            document.getElementById('app-dashboard-view').classList.add('hidden');
-            document.getElementById('landing-page-view').classList.remove('hidden');
-        }
-
-        // AUTHENTICATION MODAL FUNCTIONS
-        function openAuthModal(mode) {
-            authMode = mode;
-            const modal = document.getElementById('auth-modal');
-            const title = document.getElementById('auth-modal-title');
-            const subtitle = document.getElementById('auth-modal-subtitle');
-            const submitBtn = document.getElementById('auth-submit-btn');
-            const toggleText = document.getElementById('auth-toggle-text');
-            const toggleBtn = document.getElementById('auth-toggle-btn');
-
-            if (mode === 'signup') {
-                title.innerText = "Create Your Account";
-                subtitle.innerText = "Start managing signatures across your entire company.";
-                submitBtn.innerText = "Create Free Account";
-                toggleText.innerText = "Already have an account?";
-                toggleBtn.innerText = "Sign In";
-            } else {
-                title.innerText = "Welcome Back";
-                subtitle.innerText = "Sign in to access your SigFlow workspace.";
-                submitBtn.innerText = "Sign In";
-                toggleText.innerText = "Don't have a workspace yet?";
-                toggleBtn.innerText = "Sign Up";
-            }
-
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-        }
-
-        function closeAuthModal() {
-            const modal = document.getElementById('auth-modal');
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
-        }
-
-        function toggleAuthMode() {
-            openAuthModal(authMode === 'login' ? 'signup' : 'login');
-        }
-
-        async function handleAuthSubmit(event) {
-            event.preventDefault();
-            const email = document.getElementById('auth-email').value;
-            const password = document.getElementById('auth-password').value;
-
-            if (!supabaseClient) {
-                // Demo fallback authentication simulation if Supabase credentials are missing
-                currentUser = { id: 'demo-user-123', email: email };
-                updateAuthenticatedUI(currentUser);
-                closeAuthModal();
-                launchDashboard();
-                showToast(`Logged in successfully as ${email} (Demo Mode)`);
-                return;
-            }
-
-            try {
-                if (authMode === 'signup') {
-                    const { data, error } = await supabaseClient.auth.signUp({ email, password });
-                    if (error) throw error;
-                    showToast('Account created! Logging into workspace...');
-                    closeAuthModal();
-                    launchDashboard();
-                } else {
-                    const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-                    if (error) throw error;
-                    showToast('Signed in successfully!');
-                    closeAuthModal();
-                    launchDashboard();
-                }
-            } catch (err) {
-                showToast(err.message || 'Authentication error', 'error');
-            }
-        }
-
-        async function handleSignOut() {
-            if (supabaseClient) {
-                await supabaseClient.auth.signOut();
-            }
-            currentUser = null;
-            updateUnauthenticatedUI();
-            showToast('Signed out successfully.');
-            showLandingPage();
-        }
-
-        // TAB NAVIGATION IN DASHBOARD
-        function switchTab(tabName) {
-            const tabs = ['builder', 'roster', 'banners', 'settings'];
-            tabs.forEach(t => {
-                document.getElementById(`tab-${t}`).classList.add('hidden');
-                const navBtn = document.getElementById(`nav-${t}`);
-                navBtn.className = "w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all";
-            });
-
-            document.getElementById(`tab-${tabName}`).classList.remove('hidden');
-            const activeBtn = document.getElementById(`nav-${tabName}`);
-            activeBtn.className = "w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold bg-brand-600 text-white transition-all";
-
-            if (tabName === 'roster') {
-                fetchTeamRoster();
-            }
-        }
-
-        // SIGNATURE BUILDER & PREVIEW LOGIC
-        function updateSignaturePreview() {
-            const name = document.getElementById('input-name').value || 'Sarah Jenkins';
-            const title = document.getElementById('input-title').value || 'VP of Growth';
-            const email = document.getElementById('input-email').value || 'sarah@acmecorp.com';
-            const phone = document.getElementById('input-phone').value || '+1 (555) 234-5678';
-            const banner = document.getElementById('input-banner').value;
-
-            document.getElementById('pv-name').innerText = name;
-            document.getElementById('pv-title').innerText = title;
-            document.getElementById('pv-email').innerText = email;
-            document.getElementById('pv-phone').innerText = phone;
-            document.getElementById('pv-banner').src = banner;
-        }
-
-        function selectBannerForBuilder(bannerUrl) {
-            document.getElementById('input-banner').value = bannerUrl;
-            updateSignaturePreview();
-            switchTab('builder');
-            showToast('Banner applied to signature builder!');
-        }
-
-        // SUPABASE DATABASE ACTIONS
-        async function saveProfileToSupabase() {
-            const profileData = {
-                name: document.getElementById('input-name').value,
-                title: document.getElementById('input-title').value,
-                email: document.getElementById('input-email').value,
-                phone: document.getElementById('input-phone').value,
-                banner_url: document.getElementById('input-banner').value,
-                user_id: currentUser ? currentUser.id : null
-            };
-
-            if (supabaseClient && currentUser) {
-                try {
-                    const { data, error } = await supabaseClient
-                        .from('signatures')
-                        .insert([profileData]);
-
-                    if (error) throw error;
-                    showToast('Profile saved to Supabase Postgres!');
-                } catch (err) {
-                    showToast(`Saved locally (DB Error: ${err.message})`, 'info');
-                }
-            } else {
-                showToast('Profile saved locally (Demo Mode)!');
-            }
-        }
-
-        async function fetchTeamRoster() {
-            const rosterGrid = document.getElementById('roster-grid');
-            rosterGrid.innerHTML = '<p class="text-xs text-slate-400 col-span-full">Loading workspace profiles...</p>';
-
-            let profiles = [
-                { name: document.getElementById('input-name').value, title: document.getElementById('input-title').value, email: document.getElementById('input-email').value, phone: document.getElementById('input-phone').value, banner_url: document.getElementById('input-banner').value },
-                { name: "Marcus Vance", title: "Head of Product", email: "marcus@acmecorp.com", phone: "+1 (555) 888-9900", banner_url: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=600&q=80" }
-            ];
-
-            if (supabaseClient && currentUser) {
-                try {
-                    const { data, error } = await supabaseClient
-                        .from('signatures')
-                        .select('*')
-                        .eq('user_id', currentUser.id);
-
-                    if (!error && data && data.length > 0) {
-                        profiles = data;
-                    }
-                } catch (e) {
-                    console.log('Using default roster view');
-                }
-            }
-
-            rosterGrid.innerHTML = profiles.map(p => `
-                <div class="glass-card p-5 rounded-2xl border border-slate-800 hover:border-brand-500/40 transition-all">
-                    <div class="bg-white rounded-xl p-4 text-slate-900 font-sans shadow mb-4">
-                        <p class="text-base font-extrabold text-slate-900">${p.name}</p>
-                        <p class="text-xs font-bold text-brand-600 mb-2">${p.title}</p>
-                        <p class="text-[11px] text-slate-600 mb-3">📧 ${p.email}</p>
-                        <img src="${p.banner_url}" class="w-full h-20 object-cover rounded-lg">
-                    </div>
-                    <button onclick="copyRichSignature()" class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold rounded-xl transition-colors">
-                        📋 Copy Signature
-                    </button>
-                </div>
-            `).join('');
-        }
-
-        // CLIPBOARD EXPORT FUNCTIONS
-        function copyRichSignature() {
-            const container = document.getElementById('signature-html-container');
-            const range = document.createRange();
-            range.selectNode(container);
-            window.getSelection().removeAllRanges();
-            window.getSelection().addRange(range);
-            document.execCommand('copy');
-            window.getSelection().removeAllRanges();
-            showToast('Rich HTML Signature copied to clipboard!');
-        }
-
-        function copyRawSignatureHTML() {
-            const html = document.getElementById('signature-html-container').outerHTML;
-            const tempInput = document.createElement('textarea');
-            tempInput.value = html;
-            document.body.appendChild(tempInput);
-            tempInput.select();
-            document.execCommand('copy');
-            document.body.removeChild(tempInput);
-            showToast('Raw HTML Code copied to clipboard!');
-        }
-
-        // TOAST NOTIFICATIONS
-        function showToast(message, type = 'success') {
-            const container = document.getElementById('toast-container');
-            const toast = document.createElement('div');
-            toast.className = `px-5 py-3 rounded-xl font-bold text-xs shadow-2xl transition-all duration-300 pointer-events-auto flex items-center gap-2 ${
-                type === 'error' ? 'bg-rose-600 text-white' : 'bg-brand-600 text-white'
-            }`;
-            toast.innerHTML = `<span>⚡</span> <span>${message}</span>`;
-            container.appendChild(toast);
-
-            setTimeout(() => {
-                toast.style.opacity = '0';
-                setTimeout(() => toast.remove(), 300);
-            }, 3000);
-        }
-
-        // HERO DEMO INTERACTIVE HELPERS
-        function setHeroPreset(type) {
-            const img = document.getElementById('hero-pv-img');
-            const q4Btn = document.getElementById('preset-q4');
-            const summitBtn = document.getElementById('preset-summit');
-
-            if (type === 'q4') {
-                img.src = 'https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&w=600&q=80';
-                q4Btn.className = "w-full p-3 rounded-xl bg-brand-600/20 border border-brand-500/50 text-left transition-all flex items-center justify-between";
-                summitBtn.className = "w-full p-3 rounded-xl bg-slate-800/50 border border-slate-700/50 text-left transition-all flex items-center justify-between hover:bg-slate-800";
-            } else {
-                img.src = 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=600&q=80';
-                summitBtn.className = "w-full p-3 rounded-xl bg-brand-600/20 border border-brand-500/50 text-left transition-all flex items-center justify-between";
-                q4Btn.className = "w-full p-3 rounded-xl bg-slate-800/50 border border-slate-700/50 text-left transition-all flex items-center justify-between hover:bg-slate-800";
-            }
-        }
-
-        function demoUpdate() {
-            document.getElementById('demo-pv-name').innerText = document.getElementById('demo-name').value || 'Sarah Jenkins';
-            document.getElementById('demo-pv-title').innerText = document.getElementById('demo-title').value || 'VP of Growth & Strategy';
-        }
-    </script>
+      }
+    });
+  </script>
 </body>
 </html>
