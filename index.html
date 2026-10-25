@@ -124,10 +124,17 @@
           <h1 class="text-3xl font-extrabold text-white">Signature & Campaign Studio</h1>
           <p class="text-sm text-zinc-400">Tailor employee details and push active marketing banners across your workforce.</p>
         </div>
-        <button onclick="copySignatureHTML()" class="bg-brand-500 hover:bg-brand-600 text-zinc-950 font-bold px-5 py-2.5 rounded-xl text-sm transition-all shadow-lg shadow-brand-500/20">
-          📋 Copy Signature HTML
-        </button>
+        <div class="flex items-center space-x-3">
+          <button id="save-btn" onclick="saveSignatureToSupabase()" class="bg-zinc-800 hover:bg-zinc-700 text-white font-bold px-5 py-2.5 rounded-xl text-sm transition-all border border-zinc-700">
+            💾 Save Changes
+          </button>
+          <button onclick="copySignatureHTML()" class="bg-brand-500 hover:bg-brand-600 text-zinc-950 font-bold px-5 py-2.5 rounded-xl text-sm transition-all shadow-lg shadow-brand-500/20">
+            📋 Copy Signature HTML
+          </button>
+        </div>
       </div>
+
+      <p id="save-status" class="text-xs text-emerald-400 font-medium hidden"></p>
 
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         
@@ -277,6 +284,8 @@
     const SUPABASE_ANON_KEY = "sb_publishable_v0CB87n7dZg4kD3Wl9VQvw_Lu8y-_vo";
     
     let supabaseClient = null;
+    let currentUser = null;
+
     if (window.supabase && SUPABASE_URL && SUPABASE_ANON_KEY) {
       supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     }
@@ -304,10 +313,62 @@
       document.getElementById("prev-initials").textContent = initials;
     }
 
+    async function saveSignatureToSupabase() {
+      if (!supabaseClient || !currentUser) return;
+
+      const statusEl = document.getElementById("save-status");
+      statusEl.textContent = "Saving...";
+      statusEl.classList.remove("hidden");
+
+      const payload = {
+        user_id: currentUser.id,
+        name: document.getElementById("input-name").value,
+        title: document.getElementById("input-title").value,
+        company: document.getElementById("input-company").value,
+        phone: document.getElementById("input-phone").value,
+        banner_title: document.getElementById("input-banner-title").value,
+        banner_subtitle: document.getElementById("input-banner-subtitle").value,
+        updated_at: new Date().toISOString()
+      };
+
+      const { error } = await supabaseClient
+        .from('signatures')
+        .upsert(payload, { onConflict: 'user_id' });
+
+      if (error) {
+        statusEl.textContent = "Error saving: " + error.message;
+        statusEl.className = "text-xs text-rose-400 font-medium";
+      } else {
+        statusEl.textContent = "✓ Saved successfully to database!";
+        statusEl.className = "text-xs text-emerald-400 font-medium";
+        setTimeout(() => statusEl.classList.add("hidden"), 3000);
+      }
+    }
+
+    async function loadSignatureFromSupabase(userId) {
+      if (!supabaseClient) return;
+
+      const { data, error } = await supabaseClient
+        .from('signatures')
+        .select('*')
+        .eq('user_id', userId)
+        .single();
+
+      if (data && !error) {
+        if (data.name) document.getElementById("input-name").value = data.name;
+        if (data.title) document.getElementById("input-title").value = data.title;
+        if (data.company) document.getElementById("input-company").value = data.company;
+        if (data.phone) document.getElementById("input-phone").value = data.phone;
+        if (data.banner_title) document.getElementById("input-banner-title").value = data.banner_title;
+        if (data.banner_subtitle) document.getElementById("input-banner-subtitle").value = data.banner_subtitle;
+        updatePreview();
+      }
+    }
+
     function copySignatureHTML() {
       const box = document.getElementById("signature-preview-box").innerHTML;
       navigator.clipboard.writeText(box).then(() => {
-        alert("Signature HTML copied to clipboard with your active campaign banner!");
+        alert("Signature HTML copied to clipboard!");
       });
     }
 
@@ -355,25 +416,24 @@
     }
 
     function updateUIForUser(user) {
+      currentUser = user;
       if (user) {
         document.getElementById("user-email-display").textContent = user.email;
         document.getElementById("user-email-display").classList.remove("hidden");
         document.getElementById("auth-action-btn").textContent = "Sign Out";
         document.getElementById("auth-action-btn").onclick = handleSignOut;
 
-        // Switch views
         document.getElementById("public-hero").classList.add("hidden");
         document.getElementById("dashboard-view").classList.remove("hidden");
 
-        // Pre-fill email in form
         document.getElementById("input-email").value = user.email;
+        loadSignatureFromSupabase(user.id);
         updatePreview();
       } else {
         document.getElementById("user-email-display").classList.add("hidden");
         document.getElementById("auth-action-btn").textContent = "Sign In";
         document.getElementById("auth-action-btn").onclick = window.toggleAuthModal;
 
-        // Switch views back
         document.getElementById("public-hero").classList.remove("hidden");
         document.getElementById("dashboard-view").classList.add("hidden");
       }
