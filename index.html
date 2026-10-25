@@ -183,7 +183,7 @@
 
   <!-- SCRIPT LOGIC -->
   <script>
-    // Explicitly define toggle function globally so button onclick always triggers
+    // Explicitly define toggle function globally
     window.toggleAuthModal = function() {
       const modal = document.getElementById("auth-modal");
       if (!modal) return;
@@ -199,9 +199,9 @@
     const SUPABASE_URL = "https://zlefhkmydmaajhdptbza.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_v0CB87n7dZg4kD3Wl9VQvw_Lu8y-_vo";
     
-    let supabase = null;
+    let supabaseClient = null;
     if (window.supabase && SUPABASE_URL && SUPABASE_ANON_KEY) {
-      supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     }
 
     async function handleAuth(event) {
@@ -210,7 +210,7 @@
       const password = document.getElementById("auth-password").value;
       const messageEl = document.getElementById("auth-message");
 
-      if (!supabase) {
+      if (!supabaseClient) {
         messageEl.textContent = "Supabase API keys are not initialized properly.";
         messageEl.className = "text-xs text-center mt-4 text-amber-400";
         messageEl.classList.remove("hidden");
@@ -221,10 +221,10 @@
       messageEl.className = "text-xs text-center mt-4 text-zinc-400";
       messageEl.classList.remove("hidden");
 
-      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+      const { data: signInData, error: signInError } = await supabaseClient.auth.signInWithPassword({ email, password });
 
       if (signInError) {
-        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({ 
+        const { data: signUpData, error: signUpError } = await supabaseClient.auth.signUp({ 
           email, 
           password,
           options: { emailRedirectTo: 'https://sigspoke.com' }
@@ -261,15 +261,15 @@
     }
 
     async function handleSignOut() {
-      if (supabase) {
-        await supabase.auth.signOut();
+      if (supabaseClient) {
+        await supabaseClient.auth.signOut();
       }
       updateUIForUser(null);
     }
 
     window.addEventListener("DOMContentLoaded", async () => {
-      if (supabase) {
-        const { data: { session } } = await supabase.auth.getSession();
+      if (supabaseClient) {
+        const { data: { session } } = await supabaseClient.auth.getSession();
         if (session) {
           updateUIForUser(session.user);
         }
