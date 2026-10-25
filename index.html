@@ -183,18 +183,25 @@
 
   <!-- SCRIPT LOGIC -->
   <script>
+    // Explicitly define toggle function globally so button onclick always triggers
+    window.toggleAuthModal = function() {
+      const modal = document.getElementById("auth-modal");
+      if (!modal) return;
+      if (modal.classList.contains("hidden")) {
+        modal.classList.remove("hidden");
+        modal.classList.add("flex");
+      } else {
+        modal.classList.remove("flex");
+        modal.classList.add("hidden");
+      }
+    };
+
     const SUPABASE_URL = "https://zlefhkmydmaajhdptbza.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_v0CB87n7dZg4kD3Wl9VQvw_Lu8y-_vo";
     
     let supabase = null;
-    if (SUPABASE_URL && SUPABASE_ANON_KEY) {
+    if (window.supabase && SUPABASE_URL && SUPABASE_ANON_KEY) {
       supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    }
-
-    function toggleAuthModal() {
-      const modal = document.getElementById("auth-modal");
-      modal.classList.toggle("hidden");
-      modal.classList.toggle("flex");
     }
 
     async function handleAuth(event) {
@@ -234,7 +241,7 @@
         messageEl.textContent = "Signed in successfully!";
         messageEl.className = "text-xs text-center mt-4 text-emerald-400";
         setTimeout(() => {
-          toggleAuthModal();
+          window.toggleAuthModal();
           updateUIForUser(signInData.user);
         }, 1000);
       }
@@ -249,7 +256,7 @@
       } else {
         document.getElementById("user-email-display").classList.add("hidden");
         document.getElementById("auth-action-btn").textContent = "Sign In";
-        document.getElementById("auth-action-btn").onclick = toggleAuthModal;
+        document.getElementById("auth-action-btn").onclick = window.toggleAuthModal;
       }
     }
 
