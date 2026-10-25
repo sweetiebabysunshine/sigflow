@@ -195,8 +195,8 @@
 
         </div>
 
-        <!-- Right: Live Interactive Signature Preview -->
-        <div class="lg:col-span-6 space-y-4 sticky top-24">
+        <!-- Right: Live Interactive Signature Preview & Setup Guide -->
+        <div class="lg:col-span-6 space-y-6">
           <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 shadow-xl">
             <span class="text-xs font-bold text-zinc-400 uppercase tracking-wider block mb-4">Live Email Render Preview</span>
             
@@ -225,6 +225,17 @@
                 </tr>
               </table>
             </div>
+          </div>
+
+          <!-- Installation Guide Card -->
+          <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 space-y-3">
+            <h4 class="text-sm font-bold text-white uppercase tracking-wider">📖 Email Client Installation Guide</h4>
+            <ol class="text-xs text-zinc-400 space-y-2 list-decimal list-inside leading-relaxed">
+              <li>Click <strong class="text-white">Copy Signature HTML</strong> above.</li>
+              <li>Open your email client settings (e.g., <strong class="text-emerald-400">Gmail Settings &gt; General &gt; Signature</strong>).</li>
+              <li>Create a new signature and paste (<kbd class="bg-zinc-800 px-1.5 py-0.5 rounded text-zinc-200">Cmd+V</kbd> or <kbd class="bg-zinc-800 px-1.5 py-0.5 rounded text-zinc-200">Ctrl+V</kbd>) directly into the signature text box.</li>
+              <li>Save changes and send a test email!</li>
+            </ol>
           </div>
         </div>
 
@@ -368,7 +379,7 @@
     function copySignatureHTML() {
       const box = document.getElementById("signature-preview-box").innerHTML;
       navigator.clipboard.writeText(box).then(() => {
-        alert("Signature HTML copied to clipboard!");
+        alert("Signature HTML copied to clipboard! Ready to paste into Gmail or Outlook.");
       });
     }
 
