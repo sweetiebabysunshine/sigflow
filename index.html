@@ -122,7 +122,7 @@
       <div class="border-b border-zinc-800 pb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <h1 class="text-3xl font-extrabold text-white">Signature & Campaign Studio</h1>
-          <p class="text-sm text-zinc-400">Tailor employee details and push active marketing banners across your workforce.</p>
+          <p class="text-sm text-zinc-400">Tailor employee details, choose templates, and push active marketing banners.</p>
         </div>
         <div class="flex items-center space-x-3">
           <button id="save-btn" onclick="saveSignatureToSupabase()" class="bg-zinc-800 hover:bg-zinc-700 text-white font-bold px-5 py-2.5 rounded-xl text-sm transition-all border border-zinc-700">
@@ -138,12 +138,32 @@
 
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         
-        <!-- Left: Form Editor (Employee Details + Campaign Banner) -->
+        <!-- Left: Form Editor (Template Selector + Employee Details + Campaign Banner) -->
         <div class="lg:col-span-6 space-y-6">
           
+          <!-- Template Selector Card -->
+          <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 sm:p-8 space-y-4">
+            <h3 class="text-base font-bold text-white border-b border-zinc-800 pb-3">1. Select Template Style</h3>
+            <div class="grid grid-cols-3 gap-3">
+              <button type="button" onclick="setTemplate('modern')" id="tmpl-btn-modern" 
+                class="p-3 rounded-xl border border-brand-500 bg-brand-500/10 text-brand-400 font-bold text-xs transition-all text-center">
+                Modern Border
+              </button>
+              <button type="button" onclick="setTemplate('minimal')" id="tmpl-btn-minimal" 
+                class="p-3 rounded-xl border border-zinc-800 bg-zinc-950 text-zinc-400 font-bold text-xs transition-all text-center hover:border-zinc-700">
+                Minimalist
+              </button>
+              <button type="button" onclick="setTemplate('compact')" id="tmpl-btn-compact" 
+                class="p-3 rounded-xl border border-zinc-800 bg-zinc-950 text-zinc-400 font-bold text-xs transition-all text-center hover:border-zinc-700">
+                Compact Badge
+              </button>
+            </div>
+            <input type="hidden" id="input-template" value="modern">
+          </div>
+
           <!-- Employee Details Card -->
           <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 sm:p-8 space-y-4">
-            <h3 class="text-base font-bold text-white border-b border-zinc-800 pb-3">1. Employee Details</h3>
+            <h3 class="text-base font-bold text-white border-b border-zinc-800 pb-3">2. Employee Details</h3>
             
             <div>
               <label class="block text-xs font-semibold text-zinc-300 mb-1">Full Name</label>
@@ -178,7 +198,7 @@
 
           <!-- Campaign Banner Manager Card -->
           <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 sm:p-8 space-y-4">
-            <h3 class="text-base font-bold text-white border-b border-zinc-800 pb-3">2. Active Campaign Banner</h3>
+            <h3 class="text-base font-bold text-white border-b border-zinc-800 pb-3">3. Active Campaign Banner</h3>
             
             <div>
               <label class="block text-xs font-semibold text-zinc-300 mb-1">Banner Title / Headline</label>
@@ -201,19 +221,8 @@
             <span class="text-xs font-bold text-zinc-400 uppercase tracking-wider block mb-4">Live Email Render Preview</span>
             
             <div id="signature-preview-box" class="bg-white text-zinc-900 p-6 rounded-xl shadow-inner space-y-4 font-sans">
-              <table cellpadding="0" cellspacing="0" style="font-family: 'Plus Jakarta Sans', Arial, sans-serif; border-collapse: collapse; width: 100%;">
-                <tr>
-                  <td style="padding-right: 16px; vertical-align: middle; width: 50px;">
-                    <div id="prev-initials" style="width: 48px; height: 48px; background-color: #18181b; color: #ffffff; font-weight: bold; border-radius: 50%; text-align: center; line-height: 48px; font-size: 16px;">JS</div>
-                  </td>
-                  <td style="vertical-align: middle; border-left: 2px solid #10b981; padding-left: 16px;">
-                    <h4 id="prev-name" style="margin: 0; font-size: 15px; font-weight: 700; color: #09090b;">Jane Smith</h4>
-                    <p id="prev-title" style="margin: 2px 0; font-size: 12px; font-weight: 600; color: #059669;">VP of Revenue Operations</p>
-                    <p id="prev-company" style="margin: 0; font-size: 12px; color: #71717a; font-weight: 500;">SigSpoke Technologies</p>
-                    <p id="prev-contact" style="margin: 4px 0 0 0; font-size: 11px; color: #71717a;">jane@sigspoke.com | +1 (555) 234-5678</p>
-                  </td>
-                </tr>
-              </table>
+              <!-- Dynamic Template Container -->
+              <div id="template-render-container"></div>
 
               <!-- Banner Preview -->
               <table cellpadding="0" cellspacing="0" style="font-family: 'Plus Jakarta Sans', Arial, sans-serif; border-collapse: collapse; width: 100%; margin-top: 12px;">
@@ -301,27 +310,81 @@
       supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     }
 
+    function setTemplate(tmpl) {
+      document.getElementById("input-template").value = tmpl;
+      
+      // Update button styles
+      ['modern', 'minimal', 'compact'].forEach(t => {
+        const btn = document.getElementById(`tmpl-btn-${t}`);
+        if (t === tmpl) {
+          btn.className = "p-3 rounded-xl border border-brand-500 bg-brand-500/10 text-brand-400 font-bold text-xs transition-all text-center";
+        } else {
+          btn.className = "p-3 rounded-xl border border-zinc-800 bg-zinc-950 text-zinc-400 font-bold text-xs transition-all text-center hover:border-zinc-700";
+        }
+      });
+      updatePreview();
+    }
+
     function updatePreview() {
       const name = document.getElementById("input-name").value || "Jane Smith";
       const title = document.getElementById("input-title").value || "Job Title";
       const company = document.getElementById("input-company").value || "Company Name";
       const email = document.getElementById("input-email").value || "email@company.com";
       const phone = document.getElementById("input-phone").value || "+1 (555) 000-0000";
+      const tmpl = document.getElementById("input-template").value || "modern";
 
       const bannerTitle = document.getElementById("input-banner-title").value || "🚀 Campaign Title";
       const bannerSubtitle = document.getElementById("input-banner-subtitle").value || "Campaign details go here";
 
-      document.getElementById("prev-name").textContent = name;
-      document.getElementById("prev-title").textContent = title;
-      document.getElementById("prev-company").textContent = company;
-      document.getElementById("prev-contact").textContent = `${email} | ${phone}`;
-
       document.getElementById("prev-banner-title").textContent = bannerTitle;
       document.getElementById("prev-banner-subtitle").textContent = bannerSubtitle;
 
-      // Calculate Initials
       const initials = name.split(" ").map(n => n[0]).join("").toUpperCase().substring(0, 2) || "JS";
-      document.getElementById("prev-initials").textContent = initials;
+
+      const container = document.getElementById("template-render-container");
+
+      if (tmpl === 'minimal') {
+        container.innerHTML = `
+          <table cellpadding="0" cellspacing="0" style="font-family: 'Plus Jakarta Sans', Arial, sans-serif; border-collapse: collapse; width: 100%;">
+            <tr>
+              <td>
+                <h4 style="margin: 0; font-size: 16px; font-weight: 800; color: #09090b;">${name}</h4>
+                <p style="margin: 2px 0; font-size: 12px; font-weight: 600; color: #059669;">${title} &bull; ${company}</p>
+                <p style="margin: 4px 0 0 0; font-size: 11px; color: #71717a;">${email} | ${phone}</p>
+              </td>
+            </tr>
+          </table>
+        `;
+      } else if (tmpl === 'compact') {
+        container.innerHTML = `
+          <table cellpadding="0" cellspacing="0" style="font-family: 'Plus Jakarta Sans', Arial, sans-serif; border-collapse: collapse; width: 100%;">
+            <tr>
+              <td style="background-color: #09090b; color: #ffffff; padding: 12px; border-radius: 8px;">
+                <h4 style="margin: 0; font-size: 14px; font-weight: 700; color: #10b981;">${name}</h4>
+                <p style="margin: 2px 0; font-size: 11px; color: #d4d4d8;">${title} | ${company}</p>
+                <p style="margin: 4px 0 0 0; font-size: 10px; color: #a1a1aa;">${email} &bull; ${phone}</p>
+              </td>
+            </tr>
+          </table>
+        `;
+      } else {
+        // Modern Bordered (Default)
+        container.innerHTML = `
+          <table cellpadding="0" cellspacing="0" style="font-family: 'Plus Jakarta Sans', Arial, sans-serif; border-collapse: collapse; width: 100%;">
+            <tr>
+              <td style="padding-right: 16px; vertical-align: middle; width: 50px;">
+                <div style="width: 48px; height: 48px; background-color: #18181b; color: #ffffff; font-weight: bold; border-radius: 50%; text-align: center; line-height: 48px; font-size: 16px;">${initials}</div>
+              </td>
+              <td style="vertical-align: middle; border-left: 2px solid #10b981; padding-left: 16px;">
+                <h4 style="margin: 0; font-size: 15px; font-weight: 700; color: #09090b;">${name}</h4>
+                <p style="margin: 2px 0; font-size: 12px; font-weight: 600; color: #059669;">${title}</p>
+                <p style="margin: 0; font-size: 12px; color: #71717a; font-weight: 500;">${company}</p>
+                <p style="margin: 4px 0 0 0; font-size: 11px; color: #71717a;">${email} | ${phone}</p>
+              </td>
+            </tr>
+          </table>
+        `;
+      }
     }
 
     async function saveSignatureToSupabase() {
@@ -464,6 +527,7 @@
           updateUIForUser(session.user);
         }
       }
+      updatePreview();
     });
   </script>
 </body>
