@@ -121,8 +121,8 @@
     <div id="dashboard-view" class="hidden space-y-8">
       <div class="border-b border-zinc-800 pb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 class="text-3xl font-extrabold text-white">Signature Customizer</h1>
-          <p class="text-sm text-zinc-400">Tailor your employee details and generate your corporate email signature in real time.</p>
+          <h1 class="text-3xl font-extrabold text-white">Signature & Campaign Studio</h1>
+          <p class="text-sm text-zinc-400">Tailor employee details and push active marketing banners across your workforce.</p>
         </div>
         <button onclick="copySignatureHTML()" class="bg-brand-500 hover:bg-brand-600 text-zinc-950 font-bold px-5 py-2.5 rounded-xl text-sm transition-all shadow-lg shadow-brand-500/20">
           📋 Copy Signature HTML
@@ -131,43 +131,65 @@
 
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         
-        <!-- Left: Form Editor -->
-        <div class="lg:col-span-6 bg-zinc-900 border border-zinc-800 rounded-2xl p-6 sm:p-8 space-y-5">
-          <h3 class="text-lg font-bold text-white border-b border-zinc-800 pb-3">Employee Details</h3>
+        <!-- Left: Form Editor (Employee Details + Campaign Banner) -->
+        <div class="lg:col-span-6 space-y-6">
           
-          <div>
-            <label class="block text-xs font-semibold text-zinc-300 mb-1">Full Name</label>
-            <input type="text" id="input-name" value="Jane Smith" oninput="updatePreview()" 
-              class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-brand-500"/>
+          <!-- Employee Details Card -->
+          <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 sm:p-8 space-y-4">
+            <h3 class="text-base font-bold text-white border-b border-zinc-800 pb-3">1. Employee Details</h3>
+            
+            <div>
+              <label class="block text-xs font-semibold text-zinc-300 mb-1">Full Name</label>
+              <input type="text" id="input-name" value="Jane Smith" oninput="updatePreview()" 
+                class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-brand-500"/>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-zinc-300 mb-1">Job Title</label>
+              <input type="text" id="input-title" value="VP of Revenue Operations" oninput="updatePreview()" 
+                class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-brand-500"/>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-zinc-300 mb-1">Company / Department</label>
+              <input type="text" id="input-company" value="SigSpoke Technologies" oninput="updatePreview()" 
+                class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-brand-500"/>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-zinc-300 mb-1">Work Email</label>
+              <input type="email" id="input-email" value="jane@sigspoke.com" oninput="updatePreview()" 
+                class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-brand-500"/>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-zinc-300 mb-1">Phone Number</label>
+              <input type="text" id="input-phone" value="+1 (555) 234-5678" oninput="updatePreview()" 
+                class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-brand-500"/>
+            </div>
           </div>
 
-          <div>
-            <label class="block text-xs font-semibold text-zinc-300 mb-1">Job Title</label>
-            <input type="text" id="input-title" value="VP of Revenue Operations" oninput="updatePreview()" 
-              class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-brand-500"/>
+          <!-- Campaign Banner Manager Card -->
+          <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 sm:p-8 space-y-4">
+            <h3 class="text-base font-bold text-white border-b border-zinc-800 pb-3">2. Active Campaign Banner</h3>
+            
+            <div>
+              <label class="block text-xs font-semibold text-zinc-300 mb-1">Banner Title / Headline</label>
+              <input type="text" id="input-banner-title" value="🚀 Q4 Annual Conference" oninput="updatePreview()" 
+                class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-brand-500"/>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-zinc-300 mb-1">Banner Subtext / CTA</label>
+              <input type="text" id="input-banner-subtitle" value="Reserve your early bird pass now" oninput="updatePreview()" 
+                class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-brand-500"/>
+            </div>
           </div>
 
-          <div>
-            <label class="block text-xs font-semibold text-zinc-300 mb-1">Company / Department</label>
-            <input type="text" id="input-company" value="SigSpoke Technologies" oninput="updatePreview()" 
-              class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-brand-500"/>
-          </div>
-
-          <div>
-            <label class="block text-xs font-semibold text-zinc-300 mb-1">Work Email</label>
-            <input type="email" id="input-email" value="jane@sigspoke.com" oninput="updatePreview()" 
-              class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-brand-500"/>
-          </div>
-
-          <div>
-            <label class="block text-xs font-semibold text-zinc-300 mb-1">Phone Number</label>
-            <input type="text" id="input-phone" value="+1 (555) 234-5678" oninput="updatePreview()" 
-              class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-brand-500"/>
-          </div>
         </div>
 
         <!-- Right: Live Interactive Signature Preview -->
-        <div class="lg:col-span-6 space-y-4">
+        <div class="lg:col-span-6 space-y-4 sticky top-24">
           <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 shadow-xl">
             <span class="text-xs font-bold text-zinc-400 uppercase tracking-wider block mb-4">Live Email Render Preview</span>
             
@@ -190,8 +212,8 @@
               <table cellpadding="0" cellspacing="0" style="font-family: 'Plus Jakarta Sans', Arial, sans-serif; border-collapse: collapse; width: 100%; margin-top: 12px;">
                 <tr>
                   <td style="background: linear-gradient(135deg, #09090b 0%, #27272a 100%); color: #ffffff; padding: 10px 14px; border-radius: 8px;">
-                    <span style="font-weight: bold; font-size: 11px; color: #10b981; display: block;">🚀 Q4 Annual Conference</span>
-                    <span style="font-size: 10px; color: #d4d4d8;">Reserve your early bird pass now</span>
+                    <span id="prev-banner-title" style="font-weight: bold; font-size: 11px; color: #10b981; display: block;">🚀 Q4 Annual Conference</span>
+                    <span id="prev-banner-subtitle" style="font-size: 10px; color: #d4d4d8;">Reserve your early bird pass now</span>
                   </td>
                 </tr>
               </table>
@@ -266,10 +288,16 @@
       const email = document.getElementById("input-email").value || "email@company.com";
       const phone = document.getElementById("input-phone").value || "+1 (555) 000-0000";
 
+      const bannerTitle = document.getElementById("input-banner-title").value || "🚀 Campaign Title";
+      const bannerSubtitle = document.getElementById("input-banner-subtitle").value || "Campaign details go here";
+
       document.getElementById("prev-name").textContent = name;
       document.getElementById("prev-title").textContent = title;
       document.getElementById("prev-company").textContent = company;
       document.getElementById("prev-contact").textContent = `${email} | ${phone}`;
+
+      document.getElementById("prev-banner-title").textContent = bannerTitle;
+      document.getElementById("prev-banner-subtitle").textContent = bannerSubtitle;
 
       // Calculate Initials
       const initials = name.split(" ").map(n => n[0]).join("").toUpperCase().substring(0, 2) || "JS";
@@ -279,7 +307,7 @@
     function copySignatureHTML() {
       const box = document.getElementById("signature-preview-box").innerHTML;
       navigator.clipboard.writeText(box).then(() => {
-        alert("Signature HTML copied to clipboard! You can paste it directly into your email client settings.");
+        alert("Signature HTML copied to clipboard with your active campaign banner!");
       });
     }
 
